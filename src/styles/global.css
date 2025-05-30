@@ -1,0 +1,20 @@
+input,
+textarea {
+    border: 1.5px solid #e9c46a;
+    border-radius: 1.2em;
+    background: #fdf6ec;
+    color: #7c4a02;
+    font-size: 1.1rem;
+    cursor: pointer;
+    text-align: left;
+    transition: border 0.2s;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #b3b3b3;
+    font-size: 1.1rem;
+    font-weight: normal;
+    letter-spacing: 0.02em;
+    text-align: left;
+}

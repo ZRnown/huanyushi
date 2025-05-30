@@ -1,0 +1,7 @@
+<svg width="320" height="120" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M40 80 Q60 60 100 80 T180 80 Q200 60 240 80 T320 80" stroke="#b3b3b3" stroke-width="4" fill="none"/>
+  <path d="M60 100 Q80 90 100 100 Q120 110 140 100" stroke="#d8cfc4" stroke-width="2" fill="none"/>
+  <path d="M200 100 Q220 90 240 100 Q260 110 280 100" stroke="#d8cfc4" stroke-width="2" fill="none"/>
+  <circle cx="60" cy="80" r="8" fill="#e5e5e5" opacity="0.7"/>
+  <circle cx="260" cy="80" r="10" fill="#e5e5e5" opacity="0.7"/>
+</svg> 
