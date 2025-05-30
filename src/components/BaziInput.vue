@@ -11,7 +11,7 @@
                     <template v-if="inputType === 'ai'">
                         <label>请输入任意文字让AI识别：</label>
                         <textarea v-model="aiText" class="ai-textarea" rows="4"
-                            placeholder="请输入出生信息、地点、性别、姓名等，格式不限"></textarea>
+                            placeholder="1998年7月24日7电12分，江苏，女，若冰"></textarea>
                         <div class="bazi-examples">
                             <div class="bazi-example-title">Example:</div>
                             <div class="bazi-example">1989/12/13 21:00, new york, female, Sweet</div>

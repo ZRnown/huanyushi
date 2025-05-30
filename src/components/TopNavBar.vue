@@ -9,7 +9,8 @@
                 <router-link v-for="item in menu" :key="item.path" :to="item.path" class="nav-menu-item"
                     active-class="active">{{ item.label }}</router-link>
             </nav>
-            <div class="nav-right-area"></div>
+            <div class="nav-right-area">
+            </div>
         </div>
     </header>
 </template>
@@ -121,6 +122,7 @@ const menu = [
     width: 38px;
     height: 38px;
 }
+
 
 @media (max-width: 900px) {
     .nav-content { padding: 0 8px; }
