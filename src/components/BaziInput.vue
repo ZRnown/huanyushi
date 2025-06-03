@@ -2,16 +2,15 @@
     <div class="bazi-bg">
         <div class="bazi-main">
             <div class="bazi-panel">
-                <h2 class="bazi-title">八字输入</h2>
+                <h2 class="bazi-title">八字分析</h2>
                 <div class="bazi-tabs">
                     <button v-for="tab in tabs" :key="tab.value" :class="['bazi-tab', { active: tab.value === inputType }]"
                         @click="inputType = tab.value">{{ tab.label }}</button>
                 </div>
                 <div class="bazi-form">
                     <template v-if="inputType === 'ai'">
-                        <label>请输入任意文字让AI识别：</label>
                         <textarea v-model="aiText" class="ai-textarea" rows="4"
-                            placeholder="1998年7月24日7电12分，江苏，女，若冰"></textarea>
+                            placeholder="1998年7月23日7点28分，江苏，女，若冰"></textarea>
                         <div class="bazi-examples">
                             <div class="bazi-example-title">Example:</div>
                             <div class="bazi-example">1989/12/13 21:00, new york, female, Sweet</div>
@@ -61,7 +60,7 @@
                                     <GufengWheelPicker :items="solarMinutes" v-model="solarMinute" unit="分" style="flex:1;" />
                                 </div>
                                 <div class="bazi-picker-actions">
-                                    <button @click="showDatePicker = false">取消</button>
+                                    <button @click="onSolarCancel">取消</button>
                                     <button @click="onSolarConfirm">确认</button>
                                 </div>
                             </div>
@@ -77,7 +76,7 @@
                                     <GufengWheelPicker :items="lunarMinutes" v-model="lunarMinute" unit="分" style="flex:1;" />
                                 </div>
                                 <div class="bazi-picker-actions">
-                                    <button @click="showDatePicker = false">取消</button>
+                                    <button @click="onLunarCancel">取消</button>
                                     <button @click="onLunarConfirm">确认</button>
                                 </div>
                             </div>
@@ -92,13 +91,18 @@
                               <GufengWheelPicker :items="ganzhiList" v-model="baziHour" unit="时" style="flex:1;" />
                             </div>
                             <div class="bazi-picker-actions">
-                              <button @click="showBaziPicker = false">取消</button>
+                              <button @click="onBaziCancel">取消</button>
                               <button @click="onBaziConfirm">确认</button>
                             </div>
                           </div>
                         </div>
                     </template>
-                    <button class="bazi-btn" @click="onAnalyze">开始分析</button>
+                    <button 
+                      class="bazi-btn btn-gufeng"
+                      :disabled="analyzeDisabled"
+                      :style="analyzeDisabled ? 'background: #e5e5e5; color: #b3b3b3; cursor: not-allowed; box-shadow: none;' : ''"
+                      @click="onAnalyze"
+                    >开始分析</button>
                 </div>
             </div>
             <div class="bazi-disclaimer">
@@ -110,7 +114,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import GufengWheelPicker from './GufengWheelPicker.vue'
 
 const tabs = [
@@ -211,6 +215,40 @@ function onAnalyze() {
     // 这里只做占位，后续可实现分析逻辑
     alert('分析功能暂未开放，后续上线！')
 }
+
+// 取消按钮逻辑
+function onSolarCancel() {
+  solarDisplay.value = ''
+  showDatePicker.value = false
+}
+function onLunarCancel() {
+  lunarDisplay.value = ''
+  showDatePicker.value = false
+}
+function onBaziCancel() {
+  baziYear.value = ''
+  baziMonth.value = ''
+  baziDay.value = ''
+  baziHour.value = ''
+  showBaziPicker.value = false
+}
+
+// 分析按钮禁用逻辑
+const analyzeDisabled = computed(() => {
+  if (inputType.value === 'ai') {
+    return !aiText.value.trim()
+  }
+  if (inputType.value === 'solar') {
+    return !solarDisplay.value
+  }
+  if (inputType.value === 'lunar') {
+    return !lunarDisplay.value
+  }
+  if (inputType.value === 'bazi') {
+    return !(baziYear.value && baziMonth.value && baziDay.value && baziHour.value)
+  }
+  return true
+})
 </script>
 
 <style scoped>
@@ -257,6 +295,7 @@ function onAnalyze() {
 
 .bazi-title {
     font-size: 2.2rem;
+    font-family: "Noto Serif SC", serif;
     color: #b03a2e;
     margin-bottom: 1.2rem;
     letter-spacing: 0.18em;
@@ -436,10 +475,53 @@ function onAnalyze() {
 }
 
 .bazi-gender {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    margin-bottom: 0.2em;
+  display: flex;
+  align-items: center;
+  gap: 1.2em;
+  margin-bottom: 0.2em;
+  font-family: "Noto Serif SC", serif;
+  font-size: 1.08rem;
+}
+
+.gender-radio {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.gender-radio input[type="radio"] {
+  display: none;
+}
+
+.gender-radio-custom {
+  display: inline-block;
+  padding: 0.22em 1.2em;
+  border-radius: 1.2em;
+  border: 2px solid #e9c46a;
+  background: #fffbe6;
+  color: #7c4a02;
+  font-size: 1.08rem;
+  transition: 
+    background 0.22s, 
+    color 0.22s, 
+    border 0.22s, 
+    box-shadow 0.22s;
+  box-shadow: 0 2px 8px #e9c46a22;
+  margin-left: 0.2em;
+}
+
+.gender-radio input[type="radio"]:checked + .gender-radio-custom {
+  background: linear-gradient(90deg, #fffbe6 0%, #e9c46a 100%);
+  color: #b03a2e;
+  border-color: #b03a2e;
+  box-shadow: 0 4px 16px #e9c46a33;
+  font-weight: bold;
+}
+
+.gender-radio-custom:hover {
+  border-color: #b03a2e;
+  color: #b03a2e;
 }
 
 .bazi-extra-input {
@@ -458,20 +540,12 @@ function onAnalyze() {
 .bazi-btn {
     margin-top: 1.2em;
     padding: 0.7em 2.5em;
-    background: linear-gradient(90deg, #e9c46a 0%, #fffbe6 100%);
-    color: #7c4a02;
     border: none;
     border-radius: 2em;
     font-size: 1.2rem;
     cursor: pointer;
     opacity: 1;
-    box-shadow: 0 2px 12px rgba(180, 58, 46, 0.08);
     transition: background 0.2s, color 0.2s;
-}
-
-.bazi-btn:hover {
-    background: linear-gradient(90deg, #fffbe6 0%, #e9c46a 100%);
-    color: #b03a2e;
 }
 
 .bazi-tip {

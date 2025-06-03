@@ -18,3 +18,33 @@ textarea::placeholder {
     letter-spacing: 0.02em;
     text-align: left;
 }
+
+/* 古风按钮全局样式 */
+.btn-gufeng,
+.el-button.btn-gufeng {
+    border-radius: 9999px;
+    padding: 0.5em 2em;
+    font-weight: 600;
+    font-size: 1.08rem;
+    color: #fffbe6;
+    background: #C77F6A;
+    box-shadow: 0 2px 12px #C77F6A22;
+    border: none;
+    outline: none;
+    transition: background 0.28s cubic-bezier(.4, 0, .2, 1), color 0.18s, box-shadow 0.28s;
+    cursor: pointer;
+}
+
+.btn-gufeng:hover,
+.el-button.btn-gufeng:hover {
+    background: #D9998A;
+    color: #fffbe6;
+    box-shadow: 0 4px 16px #D9998A33;
+}
+
+.btn-gufeng:active,
+.el-button.btn-gufeng:active {
+    background: #B26259;
+    color: #fffbe6;
+    box-shadow: 0 2px 8px #B2625944;
+}

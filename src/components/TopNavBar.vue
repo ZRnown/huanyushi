@@ -10,6 +10,7 @@
                     active-class="active">{{ item.label }}</router-link>
             </nav>
             <div class="nav-right-area">
+                
             </div>
         </div>
     </header>
@@ -112,9 +113,9 @@ const menu = [
 
 .nav-menu-item.active,
 .nav-menu-item:hover {
-    background: linear-gradient(90deg, #fffbe6 0%, #e9c46a 100%);
-    color: #b03a2e;
-    box-shadow: 0 2px 12px #e9c46a33;
+    background: linear-gradient(90deg, #C77F6A 0%, #D9998A 100%);
+    color: #fffbe6;
+    box-shadow: 0 4px 18px #C77F6A44;
     transform: translateY(-2px) scale(1.06);
 }
 
@@ -122,6 +123,8 @@ const menu = [
     width: 38px;
     height: 38px;
 }
+
+
 
 
 @media (max-width: 900px) {
