@@ -1,3 +1,63 @@
+/* 全局样式重置和古风主题 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    font-family: "Noto Serif SC", "STSong", "SimSun", "霞鹜文楷", serif;
+    background: rgba(253, 245, 234);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+#app {
+    min-height: 100vh;
+    width: 100vw;
+}
+
+/* 覆盖Element Plus默认样式 */
+.el-button {
+    font-family: inherit;
+}
+
+.el-button--primary {
+    background-color: #c77f6a !important;
+    border-color: #c77f6a !important;
+}
+
+.el-button--primary:hover {
+    background-color: #d9998a !important;
+    border-color: #d9998a !important;
+}
+
+.el-input__wrapper {
+    background-color: #fdf6ec !important;
+    border: 1.5px solid #e9c46a !important;
+    border-radius: 1.2em !important;
+}
+
+.el-input__wrapper:hover {
+    border-color: #b03a2e !important;
+}
+
+.el-input__wrapper.is-focus {
+    border-color: #b03a2e !important;
+    box-shadow: 0 0 0 1px rgba(176, 58, 46, 0.2) !important;
+}
+
+.el-input__inner {
+    color: #7c4a02 !important;
+    font-family: inherit !important;
+}
+
+.el-input__inner::placeholder {
+    color: #b3b3b3 !important;
+}
+
+/* 全局输入框样式 */
 input,
 textarea {
     border: 1.5px solid #e9c46a;
@@ -5,9 +65,16 @@ textarea {
     background: #fdf6ec;
     color: #7c4a02;
     font-size: 1.1rem;
-    cursor: pointer;
-    text-align: left;
+    font-family: inherit;
     transition: border 0.2s;
+    outline: none;
+    padding: 0.6em 1em;
+}
+
+input:focus,
+textarea:focus {
+    border-color: #b03a2e;
+    box-shadow: 0 0 0 2px rgba(176, 58, 46, 0.1);
 }
 
 input::placeholder,
@@ -16,35 +83,90 @@ textarea::placeholder {
     font-size: 1.1rem;
     font-weight: normal;
     letter-spacing: 0.02em;
-    text-align: left;
 }
 
 /* 古风按钮全局样式 */
-.btn-gufeng,
-.el-button.btn-gufeng {
+.btn-gufeng {
     border-radius: 9999px;
     padding: 0.5em 2em;
     font-weight: 600;
     font-size: 1.08rem;
     color: #fffbe6;
-    background: #C77F6A;
-    box-shadow: 0 2px 12px #C77F6A22;
+    background: #c77f6a;
+    box-shadow: 0 2px 12px #c77f6a22;
     border: none;
     outline: none;
-    transition: background 0.28s cubic-bezier(.4, 0, .2, 1), color 0.18s, box-shadow 0.28s;
+    transition: background 0.28s cubic-bezier(0.4, 0, 0.2, 1), color 0.18s, box-shadow 0.28s;
     cursor: pointer;
+    font-family: inherit;
 }
 
-.btn-gufeng:hover,
-.el-button.btn-gufeng:hover {
-    background: #D9998A;
+.btn-gufeng:hover {
+    background: #d9998a;
     color: #fffbe6;
-    box-shadow: 0 4px 16px #D9998A33;
+    box-shadow: 0 4px 16px #d9998a33;
 }
 
-.btn-gufeng:active,
-.el-button.btn-gufeng:active {
-    background: #B26259;
+.btn-gufeng:active {
+    background: #b26259;
     color: #fffbe6;
-    box-shadow: 0 2px 8px #B2625944;
+    box-shadow: 0 2px 8px #b2625944;
+}
+
+.btn-gufeng:disabled {
+    background: #e5e5e5 !important;
+    color: #b3b3b3 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(233, 196, 106, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(199, 127, 106, 0.6);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(199, 127, 106, 0.8);
+}
+
+/* 页面过渡动画 */
+.page-enter-active,
+.page-leave-active {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-enter-from {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.page-leave-to {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+/* 古风全局背景样式，可用于所有页面统一背景 */
+.page-bg {
+    min-height: 100vh;
+    min-width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    background: linear-gradient(120deg, #ffffff 60%, #f5f5f0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    box-sizing: border-box;
 }
