@@ -14,7 +14,7 @@
               <input 
                 type="email" 
                 v-model="email" 
-                class="form-input" 
+                class="gufeng-input" 
                 placeholder="请输入邮箱地址" 
                 required
               />
@@ -28,7 +28,7 @@
               <input 
                 :type="showPassword ? 'text' : 'password'" 
                 v-model="password" 
-                class="form-input" 
+                class="gufeng-input" 
                 placeholder="请输入密码" 
                 required
               />
@@ -52,7 +52,7 @@
             <a href="#" class="forgot-password">忘记密码？</a>
           </div>
           
-          <button type="submit" class="login-btn" :disabled="!email || !password">
+          <button type="submit" class="gufeng-btn" :disabled="!email || !password">
             <div class="btn-background"></div>
             <div class="btn-content">
               <span class="btn-text">登录</span>
@@ -190,7 +190,7 @@
     color: #c77f6a;
   }
   
-  .form-input {
+  .gufeng-input {
     width: 100%;
     padding: 1rem 1rem 1rem 3rem;
     border: 1px solid rgba(233, 196, 106, 0.3);
@@ -203,13 +203,13 @@
     transition: all 0.3s ease;
   }
   
-  .form-input:focus {
+  .gufeng-input:focus {
     border-color: #e9c46a;
     box-shadow: 0 0 0 3px rgba(233, 196, 106, 0.1);
     transform: translateY(-1px);
   }
   
-  .form-input::placeholder {
+  .gufeng-input::placeholder {
     color: #999;
     font-style: italic;
   }
@@ -242,8 +242,8 @@
     transition: opacity 0.3s ease;
   }
   
-  .form-input:focus + .password-toggle + .input-decoration,
-  .form-input:focus + .input-decoration {
+  .gufeng-input:focus + .password-toggle + .input-decoration,
+  .gufeng-input:focus + .input-decoration {
     opacity: 1;
   }
   
@@ -304,7 +304,7 @@
     text-decoration: underline;
   }
   
-  .login-btn {
+  .gufeng-btn {
     position: relative;
     background: none;
     border: none;
@@ -316,7 +316,7 @@
     margin-top: 1rem;
   }
   
-  .login-btn:disabled {
+  .gufeng-btn:disabled {
     cursor: not-allowed;
     opacity: 0.6;
   }
@@ -333,12 +333,12 @@
     transition: all 0.3s ease;
   }
   
-  .login-btn:hover:not(:disabled) .btn-background {
+  .gufeng-btn:hover:not(:disabled) .btn-background {
     background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
     box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
   }
   
-  .login-btn:disabled .btn-background {
+  .gufeng-btn:disabled .btn-background {
     background: #e5e5e5;
     box-shadow: none;
   }
@@ -360,7 +360,7 @@
     letter-spacing: 0.1em;
   }
   
-  .login-btn:disabled .btn-text {
+  .gufeng-btn:disabled .btn-text {
     color: #999;
   }
   
@@ -377,11 +377,11 @@
     transition: transform 0.3s ease;
   }
   
-  .login-btn:hover:not(:disabled) .btn-ornament {
+  .gufeng-btn:hover:not(:disabled) .btn-ornament {
     transform: rotate(5deg);
   }
   
-  .login-btn:disabled .btn-ornament {
+  .gufeng-btn:disabled .btn-ornament {
     background: #f0f0f0;
     box-shadow: none;
   }
@@ -391,7 +391,7 @@
     color: #dc3545;
   }
   
-  .login-btn:disabled .ornament-symbol {
+  .gufeng-btn:disabled .ornament-symbol {
     color: #ccc;
   }
   
@@ -407,12 +407,12 @@
     transition: all 0.6s ease;
   }
   
-  .login-btn:active:not(:disabled) .btn-glow {
+  .gufeng-btn:active:not(:disabled) .btn-glow {
     width: 150px;
     height: 150px;
   }
   
-  .login-btn:hover:not(:disabled) {
+  .gufeng-btn:hover:not(:disabled) {
     transform: translateY(-2px);
   }
   

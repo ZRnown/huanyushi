@@ -22,11 +22,10 @@
             <div class="input-wrapper">
               <textarea 
                 v-model="aiText" 
-                class="ai-textarea" 
+                class="gufeng-textarea" 
                 rows="4"
                 placeholder="请输入您的出生信息，如：1998年7月23日7点28分，江苏，女，若冰"
               ></textarea>
-              <div class="input-decoration"></div>
             </div>
             <div class="bazi-examples">
               <div class="examples-title">示例格式</div>
@@ -48,10 +47,9 @@
                 <input 
                   type="text" 
                   v-model="userName" 
-                  class="form-input" 
+                  class="gufeng-input" 
                   placeholder="请输入姓名（可选）" 
                 />
-                <div class="input-decoration"></div>
               </div>
             </div>
 
@@ -59,13 +57,12 @@
             <div class="input-group">
               <div class="input-wrapper">
                 <div class="input-icon">📅</div>
-                <div class="date-selector" @click="showDatePicker = true">
-                  <div class="date-display">
+                <div class="date-selector" @click="openDatePicker">
+                  <div class="date-display gufeng-input">
                     <span v-if="getDisplayDate()" class="date-text">{{ getDisplayDate() }}</span>
                     <span v-else class="date-placeholder">{{ getDatePlaceholder() }}</span>
                   </div>
                 </div>
-                <div class="input-decoration"></div>
               </div>
             </div>
 
@@ -76,10 +73,9 @@
                 <input 
                   type="text" 
                   v-model="address" 
-                  class="form-input" 
+                  class="gufeng-input" 
                   placeholder="请输入出生地（可选）" 
                 />
-                <div class="input-decoration"></div>
               </div>
             </div>
 
@@ -95,10 +91,8 @@
                     <div class="yinyang-circle" :class="{ 'rotate-to-female': gender === '女' }">
                       <!-- 阴阳鱼主体 -->
                       <div class="yinyang-main">
-                        <div class="yang-half"></div>
-                        <div class="yin-half"></div>
-                        <div class="yang-dot"></div>
-                        <div class="yin-dot"></div>
+                        <div class="yinyang-dot white"></div>
+                        <div class="yinyang-dot black"></div>
                       </div>
                       <!-- 装饰粒子 -->
                       <div class="particle" v-for="i in 8" :key="i" :style="getParticleStyle(i)"></div>
@@ -133,24 +127,24 @@
               <div class="picker-content">
                 <div class="picker-columns">
                   <template v-if="inputType === 'solar'">
-                    <GufengWheelPicker :items="solarYears" v-model="solarYear" unit="年" />
-                    <GufengWheelPicker :items="solarMonths" v-model="solarMonth" unit="月" />
-                    <GufengWheelPicker :items="solarDays" v-model="solarDay" unit="日" />
-                    <GufengWheelPicker :items="solarHours" v-model="solarHour" unit="时" />
-                    <GufengWheelPicker :items="solarMinutes" v-model="solarMinute" unit="分" />
+                    <GufengWheelPicker :items="solarYears" v-model="tempSolarYear" unit="年" />
+                    <GufengWheelPicker :items="solarMonths" v-model="tempSolarMonth" unit="月" />
+                    <GufengWheelPicker :items="solarDays" v-model="tempSolarDay" unit="日" />
+                    <GufengWheelPicker :items="solarHours" v-model="tempSolarHour" unit="时" />
+                    <GufengWheelPicker :items="solarMinutes" v-model="tempSolarMinute" unit="分" />
                   </template>
                   <template v-else-if="inputType === 'lunar'">
-                    <GufengWheelPicker :items="lunarYears" v-model="lunarYear" unit="年" />
-                    <GufengWheelPicker :items="lunarMonths" v-model="lunarMonth" unit="月" />
-                    <GufengWheelPicker :items="lunarDays" v-model="lunarDay" unit="日" />
-                    <GufengWheelPicker :items="lunarHours" v-model="lunarHour" unit="时" />
-                    <GufengWheelPicker :items="lunarMinutes" v-model="lunarMinute" unit="分" />
+                    <GufengWheelPicker :items="lunarYears" v-model="tempLunarYear" unit="年" />
+                    <GufengWheelPicker :items="lunarMonths" v-model="tempLunarMonth" unit="月" />
+                    <GufengWheelPicker :items="lunarDays" v-model="tempLunarDay" unit="日" />
+                    <GufengWheelPicker :items="lunarHours" v-model="tempLunarHour" unit="时" />
+                    <GufengWheelPicker :items="lunarMinutes" v-model="tempLunarMinute" unit="分" />
                   </template>
                   <template v-else-if="inputType === 'bazi'">
-                    <GufengWheelPicker :items="ganzhiList" v-model="baziYear" unit="年" />
-                    <GufengWheelPicker :items="ganzhiList" v-model="baziMonth" unit="月" />
-                    <GufengWheelPicker :items="ganzhiList" v-model="baziDay" unit="日" />
-                    <GufengWheelPicker :items="ganzhiList" v-model="baziHour" unit="时" />
+                    <GufengWheelPicker :items="ganzhiList" v-model="tempBaziYear" unit="年" />
+                    <GufengWheelPicker :items="ganzhiList" v-model="tempBaziMonth" unit="月" />
+                    <GufengWheelPicker :items="ganzhiList" v-model="tempBaziDay" unit="日" />
+                    <GufengWheelPicker :items="ganzhiList" v-model="tempBaziHour" unit="时" />
                   </template>
                 </div>
               </div>
@@ -169,7 +163,7 @@
         <!-- 分析按钮 -->
         <div class="analyze-section">
           <button 
-            class="analyze-btn"
+            class="gufeng-btn"
             :class="{ disabled: analyzeDisabled }"
             :disabled="analyzeDisabled"
             @click="onAnalyze"
@@ -198,6 +192,8 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import GufengWheelPicker from './GufengWheelPicker.vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const tabs = [
   { label: 'AI识别', value: 'ai' },
@@ -223,7 +219,9 @@ function getBeijingNow() {
 }
 
 const now = getBeijingNow()
-const solarYears = Array.from({ length: now.getFullYear() - 1900 + 1 }, (_, i) => 1900 + i)
+// 年份范围：公元1年到今年
+const solarYears = Array.from({ length: now.getFullYear() }, (_, i) => i + 1)
+const lunarYears = Array.from({ length: now.getFullYear() }, (_, i) => i + 1)
 const solarMonths = Array.from({ length: 12 }, (_, i) => i + 1)
 const solarHours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
 const solarMinutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
@@ -235,11 +233,6 @@ const solarHour = ref(now.getHours().toString().padStart(2, '0'))
 const solarMinute = ref(now.getMinutes().toString().padStart(2, '0'))
 const solarDisplay = ref('')
 const solarDays = ref([])
-
-const lunarYears = Array.from({ length: now.getFullYear() - 1900 + 1 }, (_, i) => 1900 + i)
-const lunarMonths = Array.from({ length: 12 }, (_, i) => i + 1)
-const lunarHours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
-const lunarMinutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
 
 const lunarYear = ref(now.getFullYear())
 const lunarMonth = ref(now.getMonth() + 1)
@@ -264,6 +257,24 @@ const ganzhiList = [
   '甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥'
 ]
 
+// 临时变量
+const tempSolarYear = ref(solarYear.value)
+const tempSolarMonth = ref(solarMonth.value)
+const tempSolarDay = ref(solarDay.value)
+const tempSolarHour = ref(solarHour.value)
+const tempSolarMinute = ref(solarMinute.value)
+
+const tempLunarYear = ref(lunarYear.value)
+const tempLunarMonth = ref(lunarMonth.value)
+const tempLunarDay = ref(lunarDay.value)
+const tempLunarHour = ref(lunarHour.value)
+const tempLunarMinute = ref(lunarMinute.value)
+
+const tempBaziYear = ref(baziYear.value)
+const tempBaziMonth = ref(baziMonth.value)
+const tempBaziDay = ref(baziDay.value)
+const tempBaziHour = ref(baziHour.value)
+
 function getDaysInMonth(year, month) {
   return new Date(year, month, 0).getDate()
 }
@@ -272,17 +283,27 @@ function getDaysInMonth(year, month) {
 solarDays.value = Array.from({ length: getDaysInMonth(solarYear.value, solarMonth.value) }, (_, i) => i + 1)
 lunarDays.value = Array.from({ length: getDaysInMonth(lunarYear.value, lunarMonth.value) }, (_, i) => i + 1)
 
-// 监听年月变化
+// 监听主变量和临时变量变化，动态生成天数
 watch([solarYear, solarMonth], ([y, m]) => {
   const days = getDaysInMonth(y, m)
   solarDays.value = Array.from({ length: days }, (_, i) => i + 1)
   if (solarDay.value > days) solarDay.value = days
 })
-
 watch([lunarYear, lunarMonth], ([y, m]) => {
   const days = getDaysInMonth(y, m)
   lunarDays.value = Array.from({ length: days }, (_, i) => i + 1)
   if (lunarDay.value > days) lunarDay.value = days
+})
+// 监听临时变量变化，弹窗内天数也要动态变化
+watch([tempSolarYear, tempSolarMonth], ([y, m]) => {
+  const days = getDaysInMonth(y, m)
+  solarDays.value = Array.from({ length: days }, (_, i) => i + 1)
+  if (tempSolarDay.value > days) tempSolarDay.value = days
+})
+watch([tempLunarYear, tempLunarMonth], ([y, m]) => {
+  const days = getDaysInMonth(y, m)
+  lunarDays.value = Array.from({ length: days }, (_, i) => i + 1)
+  if (tempLunarDay.value > days) tempLunarDay.value = days
 })
 
 // 辅助函数
@@ -324,11 +345,48 @@ const getPickerTitle = () => {
   return titles[inputType.value] || '选择时间'
 }
 
+function openDatePicker() {
+  if (inputType.value === 'solar') {
+    tempSolarYear.value = solarYear.value
+    tempSolarMonth.value = solarMonth.value
+    tempSolarDay.value = solarDay.value
+    tempSolarHour.value = solarHour.value
+    tempSolarMinute.value = solarMinute.value
+  } else if (inputType.value === 'lunar') {
+    tempLunarYear.value = lunarYear.value
+    tempLunarMonth.value = lunarMonth.value
+    tempLunarDay.value = lunarDay.value
+    tempLunarHour.value = lunarHour.value
+    tempLunarMinute.value = lunarMinute.value
+  } else if (inputType.value === 'bazi') {
+    tempBaziYear.value = baziYear.value
+    tempBaziMonth.value = baziMonth.value
+    tempBaziDay.value = baziDay.value
+    tempBaziHour.value = baziHour.value
+  }
+  showDatePicker.value = true
+}
+
 const onConfirm = () => {
   if (inputType.value === 'solar') {
+    solarYear.value = tempSolarYear.value
+    solarMonth.value = tempSolarMonth.value
+    solarDay.value = tempSolarDay.value
+    solarHour.value = tempSolarHour.value
+    solarMinute.value = tempSolarMinute.value
     solarDisplay.value = `${solarYear.value}年${solarMonth.value}月${solarDay.value}日 ${solarHour.value}:${solarMinute.value}`
   } else if (inputType.value === 'lunar') {
+    lunarYear.value = tempLunarYear.value
+    lunarMonth.value = tempLunarMonth.value
+    lunarDay.value = tempLunarDay.value
+    lunarHour.value = tempLunarHour.value
+    lunarMinute.value = tempLunarMinute.value
     lunarDisplay.value = `${lunarYear.value}年${lunarMonth.value}月${lunarDay.value}日 ${lunarHour.value}:${lunarMinute.value}`
+  } else if (inputType.value === 'bazi') {
+    baziYear.value = tempBaziYear.value
+    baziMonth.value = tempBaziMonth.value
+    baziDay.value = tempBaziDay.value
+    baziHour.value = tempBaziHour.value
   }
   showDatePicker.value = false
 }
@@ -338,7 +396,7 @@ const onCancel = () => {
 }
 
 const onAnalyze = () => {
-  alert('分析功能正在开发中，敬请期待！')
+  router.push('/result')
 }
 
 const analyzeDisabled = computed(() => {
@@ -472,26 +530,25 @@ const getParticleStyle = (index) => {
   z-index: 2;
 }
 
-.form-input {
-  width: 100%;
-  padding: 1rem 1rem 1rem 3rem;
-  border: 2px solid rgba(233, 196, 106, 0.3);
-  border-radius: 12px;
-  background: #fff;
-  color: #314a43;
-  font-size: 1.1rem;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
-  text-align: left;
-}
+.gufeng-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 1px solid rgba(233, 196, 106, 0.3);
+    border-radius: 12px;
+    background: #fff;
+    color: #314a43;
+    font-size: 1.1rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.3s ease;
+  }
 
-.ai-textarea {
+.gufeng-textarea {
   width: 100%;
   min-height: 120px;
   resize: vertical;
   padding: 1.2rem 1rem 1.2rem 1rem;
-  border: 2px solid rgba(233, 196, 106, 0.3);
+  border: 1px solid rgba(233, 196, 106, 0.3);
   border-radius: 12px;
   background: #fff;
   color: #314a43;
@@ -502,34 +559,15 @@ const getParticleStyle = (index) => {
   text-align: left;
 }
 
-.form-input:focus, .ai-textarea:focus {
-  border-color: #e9c46a;
-  box-shadow: 0 0 0 4px rgba(233, 196, 106, 0.15);
-  transform: translateY(-2px);
-}
+.gufeng-input:focus, .gufeng-textarea:focus {
+    border-color: #e9c46a;
+    box-shadow: 0 0 0 3px rgba(233, 196, 106, 0.1);
+    transform: translateY(-1px);
+  }
 
-.form-input::placeholder, .ai-textarea::placeholder {
-  color: #999;
-  font-style: italic;
-  text-align: left;
-}
-
-.input-decoration {
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #e9c46a, transparent);
-  border-radius: 2px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.form-input:focus + .input-decoration,
-.ai-textarea:focus + .input-decoration {
-  opacity: 1;
+.gufeng-input::placeholder, .gufeng-textarea::placeholder {
+    color: #999;
+    font-style: italic;
 }
 
 /* 示例区域 */
@@ -638,70 +676,25 @@ const getParticleStyle = (index) => {
   border-radius: 50%;
   position: relative;
   overflow: hidden;
-  background: #fff;
   border: 3px solid #dc3545;
+  background:
+    radial-gradient(50% 50% at 50% 25%, #000 20%, #fff 20%, #fff 50%, transparent 50%),
+    radial-gradient(50% 50% at 50% 75%, #fff 20%, #000 20%, #000 50%, transparent 50%),
+    linear-gradient(to right, #fff 50%, #000 50%);
 }
-.yang-half {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50%;
-  height: 100%;
+.yinyang-dot.white {
+  left: 50%;
+  top: 75%;
+  transform: translate(-50%, -50%);
   background: #fff;
-  border-radius: 100px 0 0 100px;
+  border: none;
 }
-.yin-half {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50%;
-  height: 100%;
-  background: #2c3e50;
-  border-radius: 0 100px 100px 0;
-}
-.yang-half::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50px;
-  height: 50px;
-  background: #2c3e50;
-  border-radius: 50%;
-  transform: translateX(50%);
-}
-.yin-half::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 50px;
-  height: 50px;
-  background: #fff;
-  border-radius: 50%;
-  transform: translateX(-50%);
-}
-.yang-dot {
-  position: absolute;
+.yinyang-dot.black {
+  left: 50%;
   top: 25%;
-  right: 25%;
-  width: 12px;
-  height: 12px;
-  background: #fff;
-  border-radius: 50%;
-  transform: translate(50%, -50%);
-  z-index: 2;
-}
-.yin-dot {
-  position: absolute;
-  bottom: 25%;
-  left: 25%;
-  width: 12px;
-  height: 12px;
-  background: #2c3e50;
-  border-radius: 50%;
-  transform: translate(-50%, 50%);
-  z-index: 2;
+  transform: translate(-50%, -50%);
+  background: #000;
+  border: none;
 }
 .particle {
   position: absolute;
@@ -802,7 +795,7 @@ const getParticleStyle = (index) => {
 .date-display {
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
-  border: 2px solid rgba(233, 196, 106, 0.3);
+  border: 1px solid rgba(233, 196, 106, 0.3);
   border-radius: 12px;
   background: #fff;
   color: #314a43;
@@ -963,17 +956,17 @@ const getParticleStyle = (index) => {
   margin-top: 1rem;
 }
 
-.analyze-btn {
+.gufeng-btn {
   position: relative;
   background: none;
   border: none;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.3s ease;
-  overflow: hidden;
+  outline: none !important;
 }
 
-.analyze-btn.disabled {
+.gufeng-btn.disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -990,12 +983,26 @@ const getParticleStyle = (index) => {
   transition: all 0.3s ease;
 }
 
-.analyze-btn:hover:not(.disabled) .btn-background {
+.gufeng-btn:hover:not(.disabled) .btn-background {
   background: linear-gradient(135deg, #d9998a 0%, #e6b5a8 100%);
   box-shadow: 0 8px 25px rgba(199, 127, 106, 0.4);
 }
 
-.analyze-btn.disabled .btn-background {
+.gufeng-btn:focus,
+.gufeng-btn:focus-visible,
+.gufeng-btn:active {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.gufeng-btn:focus:not(.disabled) .btn-background,
+.gufeng-btn:focus-visible:not(.disabled) .btn-background {
+    background: linear-gradient(135deg, #d9998a 0%, #e6b5a8 100%);
+    box-shadow: 0 8px 25px rgba(199, 127, 106, 0.4) !important;
+}
+
+.gufeng-btn:disabled .btn-background {
   background: #e5e5e5;
   box-shadow: none;
 }
@@ -1016,7 +1023,7 @@ const getParticleStyle = (index) => {
   letter-spacing: 0.05em;
 }
 
-.analyze-btn.disabled .btn-text {
+.gufeng-btn.disabled .btn-text {
   color: #999;
 }
 
@@ -1033,11 +1040,11 @@ const getParticleStyle = (index) => {
   transition: transform 0.3s ease;
 }
 
-.analyze-btn:hover:not(.disabled) .btn-ornament {
+.gufeng-btn:hover:not(.disabled) .btn-ornament {
   transform: rotate(5deg);
 }
 
-.analyze-btn.disabled .btn-ornament {
+.gufeng-btn:disabled .btn-ornament {
   background: #f0f0f0;
   box-shadow: none;
 }
@@ -1048,7 +1055,7 @@ const getParticleStyle = (index) => {
   font-weight: bold;
 }
 
-.analyze-btn.disabled .ornament-symbol {
+.gufeng-btn.disabled .ornament-symbol {
   color: #ccc;
 }
 
@@ -1064,16 +1071,16 @@ const getParticleStyle = (index) => {
   transition: all 0.6s ease;
 }
 
-.analyze-btn:active:not(.disabled) .btn-glow {
+.gufeng-btn:active:not(.disabled) .btn-glow {
   width: 150px;
   height: 150px;
 }
 
-.analyze-btn:hover:not(.disabled) {
+.gufeng-btn:hover:not(.disabled) {
   transform: translateY(-3px);
 }
 
-.analyze-btn:active:not(.disabled) {
+.gufeng-btn:active:not(.disabled) {
   transform: translateY(-1px);
 }
 

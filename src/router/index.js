@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import BaziInput from '../components/BaziInput.vue'
 import BaziHepan from '../components/BaziHepan.vue'
+import BaziResult from '../components/BaziResult.vue'
 import CaseRecords from '../components/CaseRecords.vue'
 import StudyClass from '../components/StudyClass.vue'
 import VipCenter from '../components/VipCenter.vue'
@@ -23,6 +24,11 @@ const routes = [
     },
     {
         path: '/vip', component: VipCenter, meta: { title: "会员中心 - 唤雨师AI" },
+    },
+    {
+        path: "/result",
+        component: BaziResult,
+        meta: { title: "八字分析结果 - 唤雨师AI" },
     },
     {
         path: "/login",

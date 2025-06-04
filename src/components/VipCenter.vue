@@ -2,7 +2,6 @@
     <div class="page-container">
       <div class="page-panel">
         <h2 class="page-title">会员中心</h2>
-        
         <div class="membership-plans">
           <div class="plan-card">
             <div class="plan-header">
@@ -27,7 +26,6 @@
             </div>
             <button class="plan-btn current">当前版本</button>
           </div>
-          
           <div class="plan-card premium">
             <div class="plan-badge">推荐</div>
             <div class="plan-header">
@@ -152,7 +150,7 @@
   
   .page-title {
     font-size: 2.2rem;
-    color: #314a43;
+    color: #b03a2e;
     text-align: center;
     margin-bottom: 2.5rem;
     font-weight: bold;

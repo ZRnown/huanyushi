@@ -57,33 +57,6 @@ body {
     color: #b3b3b3 !important;
 }
 
-/* 全局输入框样式 */
-input,
-textarea {
-    border: 1.5px solid #e9c46a;
-    border-radius: 1.2em;
-    background: #fdf6ec;
-    color: #7c4a02;
-    font-size: 1.1rem;
-    font-family: inherit;
-    transition: border 0.2s;
-    outline: none;
-    padding: 0.6em 1em;
-}
-
-input:focus,
-textarea:focus {
-    border-color: #b03a2e;
-    box-shadow: 0 0 0 2px rgba(176, 58, 46, 0.1);
-}
-
-input::placeholder,
-textarea::placeholder {
-    color: #b3b3b3;
-    font-size: 1.1rem;
-    font-weight: normal;
-    letter-spacing: 0.02em;
-}
 
 /* 古风按钮全局样式 */
 .btn-gufeng {
@@ -122,7 +95,38 @@ textarea::placeholder {
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 0 !important;
+}
+
+::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0;
+}
+
+/* 全局按钮焦点样式优化：移除不好看的透明矩形 */
+button:focus,
+.btn-gufeng:focus,
+.action-btn:focus,
+/* 针对action-buttons内的按钮 */
+.quick-question-btn:focus,
+/* 针对快捷提问按钮 */
+a:focus,
+[role="button"]:focus {
+    outline: none !important;
+}
+
+/* 可以选择性地为需要焦点指示器的元素添加自定义样式，例如键盘导航 */
+button:focus-visible,
+.btn-gufeng:focus-visible,
+.action-btn:focus-visible,
+.quick-question-btn:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+    outline: none !important;
+    /* 再次确保移除默认轮廓 */
+    /* 可以选择在这里添加自定义的焦点样式，比如边框或阴影 */
+    /* 例如：box-shadow: 0 0 0 2px rgba(199, 127, 106, 0.5); */
+    /* 例如：border: 2px solid #c77f6a; */
 }
 
 ::-webkit-scrollbar-track {
@@ -153,20 +157,4 @@ textarea::placeholder {
 .page-leave-to {
     opacity: 0;
     transform: translateY(-20px);
-}
-
-/* 古风全局背景样式，可用于所有页面统一背景 */
-.page-bg {
-    min-height: 100vh;
-    min-width: 100vw;
-    max-width: 100vw;
-    max-height: 100vh;
-    background: linear-gradient(120deg, #ffffff 60%, #f5f5f0 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    box-sizing: border-box;
 }

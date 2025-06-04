@@ -39,15 +39,12 @@
 
 <script setup>
 import { ref, watch, onMounted, nextTick, defineProps, defineEmits } from 'vue'
-
 const props = defineProps({
   items: { type: Array, required: true },
   modelValue: { type: [String, Number], default: null },
   unit: { type: String, default: '' },
 })
-
 const emits = defineEmits(['update:modelValue', 'selected-change'])
-
 const pickerContainer = ref(null)
 const selectedIndex = ref(props.items.indexOf(props.modelValue) !== -1 ? props.items.indexOf(props.modelValue) : 0)
 const translateY = ref(0)
@@ -92,13 +89,11 @@ const startDrag = (event) => {
   startY.value = event.clientY
   startTranslateY.value = translateY.value
 }
-
 const handleDrag = (event) => {
   if (isDragging.value) {
     translateY.value = startTranslateY.value + (event.clientY - startY.value)
   }
 }
-
 const endDrag = () => {
   if (isDragging.value) {
     isDragging.value = false
@@ -107,23 +102,19 @@ const endDrag = () => {
     selectItem(index)
   }
 }
-
 // 触屏支持
 const startDragTouch = (event) => {
   isDragging.value = true
   startY.value = event.touches[0].clientY
   startTranslateY.value = translateY.value
 }
-
 const handleDragTouch = (event) => {
   if (isDragging.value) {
     translateY.value = startTranslateY.value + (event.touches[0].clientY - startY.value)
   }
 }
-
 const selectFirstItem = () => selectItem(0)
 const selectLastItem = () => selectItem(props.items.length - 1)
-
 const updateItemHeight = () => {
   if (pickerContainer.value) {
     const firstItem = pickerContainer.value.querySelector('.gufeng-picker-item')
@@ -133,7 +124,6 @@ const updateItemHeight = () => {
     containerHeight.value = pickerContainer.value.offsetHeight
   }
 }
-
 onMounted(() => {
   nextTick(() => {
     updateItemHeight()
@@ -145,124 +135,69 @@ onMounted(() => {
 <style scoped>
 .gufeng-wheel-picker {
   position: relative;
-  width: 72px;
+  width: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: none;
 }
-
 .gufeng-picker-btn {
   width: 100%;
-  height: 36px;
-  background: linear-gradient(135deg, #fffbe6 0%, #f5f1e0 100%);
-  border: 1.5px solid #e9c46a;
-  color: #C77F6A;
-  font-size: 1.3em;
-  border-radius: 12px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: #b03a2e;
+  font-size: 1.2em;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.3s cubic-bezier(.4, 0, .2, 1);
-  box-shadow: 0 2px 8px rgba(199, 127, 106, 0.15);
-  margin-bottom: 2px;
+  transition: color 0.18s;
 }
-
-.gufeng-picker-btn:hover {
-  background: linear-gradient(135deg, #D9998A 0%, #C77F6A 100%);
-  color: #fffbe6;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(199, 127, 106, 0.25);
-}
-
-.gufeng-picker-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(199, 127, 106, 0.2);
-}
-
 .gufeng-picker-btn-icon {
   font-size: 1.2em;
-  color: inherit;
+  color: #e9c46a;
 }
-
 .gufeng-picker-container {
-  height: 216px;
+  height: 216px; /* 36*6 */
   width: 100%;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(135deg, #fffbe6 0%, #f5f1e0 100%);
-  border-radius: 16px;
+  background: #fffbe6;
+  border-radius: 12px;
   border: 1.5px solid #e9c46a;
-  box-shadow: 
-    0 4px 18px rgba(233, 196, 106, 0.15),
-    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 12px #e9c46a22;
   margin: 2px 0;
   user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
 .gufeng-picker-list {
-  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
-  width: 100%;
+  transition: transform 0.18s cubic-bezier(.4,0,.2,1);
 }
-
 .gufeng-picker-item {
-  height: 38px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.18rem;
-  color: #314a43;
+  font-size: 1.08rem;
+  color: #7c4a02;
   font-family: 'Noto Serif SC', 'STSong', 'SimSun', '霞鹜文楷', serif;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(.4,0,.2,1);
-  border-radius: 10px;
-  margin: 0 4px;
+  transition: color 0.18s, background 0.18s;
+  border-radius: 8px;
+  margin: 0;
   background: none;
-  font-weight: 500;
-  position: relative;
 }
-
-.gufeng-picker-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #D9998A 0%, #C77F6A 100%);
-  border-radius: 10px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: -1;
+.gufeng-picker-item.selected {
+  color: #b9452d;
+  font-weight: normal;
+  background: none;
+  box-shadow: none;
 }
-
-.gufeng-picker-item.selected::before,
-.gufeng-picker-item:hover::before {
-  opacity: 1;
-}
-
-.gufeng-picker-item.selected,
-.gufeng-picker-item:hover {
-  color: #fffbe6;
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(217, 153, 138, 0.3);
-}
-
 .gufeng-picker-highlight {
   position: absolute;
-  left: 4px; 
-  right: 4px;
-  top: 89px;
-  height: 38px;
-  background: rgba(233,196,106,0.15);
-  border-radius: 10px;
+  left: 0; right: 0;
+  top: 90px; /* (216-36)/2 */
+  height: 36px;
+  border-top: 1.5px solid #e9c46a;
+  border-bottom: 1.5px solid #e9c46a;
   pointer-events: none;
   z-index: 2;
-  border: 1.5px solid rgba(233, 196, 106, 0.4);
-  box-shadow: 
-    0 2px 8px rgba(233, 196, 106, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
-</style>
+</style> 
