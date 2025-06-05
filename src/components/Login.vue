@@ -10,12 +10,12 @@
         <form class="login-form" @submit.prevent="handleLogin">
           <div class="form-group">
             <div class="input-wrapper">
-              <div class="input-icon">📧</div>
+              <div class="input-icon">👤</div>
               <input 
-                type="email" 
-                v-model="email" 
+                type="text" 
+                v-model="loginIdentifier" 
                 class="gufeng-input" 
-                placeholder="请输入邮箱地址" 
+                placeholder="请输入用户名或手机号" 
                 required
               />
               <div class="input-decoration"></div>
@@ -37,8 +37,7 @@
                 class="password-toggle" 
                 @click="showPassword = !showPassword"
               >
-                {{ showPassword ? '👁️' : '👁️‍🗨️' }}
-              </button>
+                {{ showPassword ? '👁️' : '👁️‍🗨️' }}</button>
               <div class="input-decoration"></div>
             </div>
           </div>
@@ -52,7 +51,7 @@
             <a href="#" class="forgot-password">忘记密码？</a>
           </div>
           
-          <button type="submit" class="gufeng-btn" :disabled="!email || !password">
+          <button type="submit" class="gufeng-btn" :disabled="!loginIdentifier || !password">
             <div class="btn-background"></div>
             <div class="btn-content">
               <span class="btn-text">登录</span>
@@ -63,25 +62,7 @@
             <div class="btn-glow"></div>
           </button>
           
-          <div class="social-login">
-            <div class="divider">
-              <span class="divider-text">或使用以下方式登录</span>
-            </div>
-            <div class="social-buttons">
-              <button type="button" class="social-btn wechat">
-                <span class="social-icon">💬</span>
-                <span>微信</span>
-              </button>
-              <button type="button" class="social-btn qq">
-                <span class="social-icon">🐧</span>
-                <span>QQ</span>
-              </button>
-              <button type="button" class="social-btn weibo">
-                <span class="social-icon">📱</span>
-                <span>微博</span>
-              </button>
-            </div>
-          </div>
+          
         </form>
         
         <div class="login-footer">
@@ -99,18 +80,30 @@
   import { useRouter } from 'vue-router'
   
   const router = useRouter()
-  const email = ref('')
+  const loginIdentifier = ref('') // 用于用户名或手机号输入
   const password = ref('')
   const rememberMe = ref(false)
   const showPassword = ref(false)
   
   const handleLogin = () => {
     // 模拟登录逻辑
-    console.log('登录信息:', { email: email.value, password: password.value, rememberMe: rememberMe.value })
+    console.log('尝试登录:', { identifier: loginIdentifier.value, password: password.value, rememberMe: rememberMe.value })
     
-    // 这里应该调用实际的登录API
-    // 登录成功后跳转到用户中心
-    router.push('/user')
+    // 判断输入是手机号还是用户名
+    const isPhoneNumber = /^[0-9]{11}$/.test(loginIdentifier.value)
+    
+    if (isPhoneNumber) {
+      console.log('使用手机号登录')
+      // TODO: 调用手机号登录API
+    } else {
+      console.log('使用用户名登录')
+      // TODO: 调用用户名登录API
+    }
+    
+    // 这里应该根据API返回的登录结果进行跳转
+    // 模拟登录成功后跳转到用户中心
+    // router.push('/user')
+     alert('登录逻辑待实现'); // 临时提示
   }
   </script>
   
@@ -174,6 +167,7 @@
   .form-group {
     display: flex;
     flex-direction: column;
+    position: relative;
   }
   
   .input-wrapper {
@@ -416,63 +410,8 @@
     transform: translateY(-2px);
   }
   
-  .social-login {
-    margin-top: 2rem;
-  }
   
-  .divider {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    position: relative;
-  }
   
-  .divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(233, 196, 106, 0.3);
-  }
-  
-  .divider-text {
-    background: #fff;
-    padding: 0 1rem;
-    color: #666;
-    font-size: 0.9rem;
-  }
-  
-  .social-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-  }
-  
-  .social-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1rem;
-    border: 1px solid rgba(233, 196, 106, 0.3);
-    border-radius: 8px;
-    background: #fff;
-    color: #314a43;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: inherit;
-  }
-  
-  .social-btn:hover {
-    border-color: #e9c46a;
-    background: rgba(233, 196, 106, 0.05);
-    transform: translateY(-1px);
-  }
-  
-  .social-icon {
-    font-size: 1.1rem;
-  }
   
   .login-footer {
     text-align: center;
@@ -529,5 +468,42 @@
       padding: 0.8rem 1.5rem;
     }
   }
+  
+  .error-message {
+    /* 聊天气泡样式 */
+    background-color: #fff0f0; /* 淡红色背景 */
+    color: #dc3545; /* 错误文本颜色 */
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    position: absolute; /* 改为绝对定位 */
+    bottom: -35px; /* 定位在输入框下方，根据实际高度调整 */
+    left: 0; /* 与输入框左侧对齐 */
+    z-index: 10; /* 确保在其他元素之上 */
+    max-width: 90%; /* 限制最大宽度 */
+    word-break: break-word; /* 防止长文本溢出 */
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.1); /* 添加轻微阴影 */
+    border: 1px solid rgba(220, 53, 69, 0.3);
+  }
+  
+  /* 气泡的尖角 */
+  .error-message::before {
+    content: '';
+    position: absolute;
+    bottom: 100%; /* 定位在气泡上方 */
+    left: 15px; /* 尖角的位置 */
+    border-width: 0 6px 8px 6px; /* 创建三角形 */
+    border-style: solid;
+    border-color: transparent transparent #fff0f0 transparent; /* 尖角颜色与背景一致 */
+    filter: drop-shadow(0 -2px 2px rgba(220, 53, 69, 0.1)); /* 添加阴影让尖角更立体 */
+  }
+  
+  /* 如果需要尖角指向右侧，可以调整伪类样式 */
+  /* .error-message::before {
+    ... */
+  /*  left: auto;
+    right: 15px;
+    border-color: transparent transparent #fff0f0 transparent;
+  } */
   </style>
   

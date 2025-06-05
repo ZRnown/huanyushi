@@ -22,19 +22,6 @@
             </div>
           </div>
           
-          <div class="form-group">
-            <div class="input-wrapper">
-              <div class="input-icon">📧</div>
-              <input 
-                type="email" 
-                v-model="email" 
-                class="form-input" 
-                placeholder="请输入邮箱地址" 
-                required
-              />
-              <div class="input-decoration"></div>
-            </div>
-          </div>
           
           <div class="form-group">
             <div class="input-wrapper">
@@ -45,8 +32,12 @@
                 class="form-input" 
                 placeholder="请输入手机号码" 
                 required
+                @input="validatePhone"
               />
               <div class="input-decoration"></div>
+            </div>
+             <div v-if="phoneError" class="error-message">
+              {{ phoneError }}
             </div>
           </div>
           
@@ -66,8 +57,7 @@
                 class="password-toggle" 
                 @click="showPassword = !showPassword"
               >
-                {{ showPassword ? '👁️' : '👁️‍🗨️' }}
-              </button>
+                {{ showPassword ? '👁️' : '👁️‍🗨️' }}</button>
               <div class="input-decoration"></div>
             </div>
           </div>
@@ -87,8 +77,7 @@
                 class="password-toggle" 
                 @click="showConfirmPassword = !showConfirmPassword"
               >
-                {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
-              </button>
+                {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}</button>
               <div class="input-decoration"></div>
             </div>
             <div v-if="password && confirmPassword && password !== confirmPassword" class="error-message">
@@ -124,25 +113,7 @@
             <div class="btn-glow"></div>
           </button>
           
-          <div class="social-register">
-            <div class="divider">
-              <span class="divider-text">或使用以下方式注册</span>
-            </div>
-            <div class="social-buttons">
-              <button type="button" class="social-btn wechat">
-                <span class="social-icon">💬</span>
-                <span>微信</span>
-              </button>
-              <button type="button" class="social-btn qq">
-                <span class="social-icon">🐧</span>
-                <span>QQ</span>
-              </button>
-              <button type="button" class="social-btn weibo">
-                <span class="social-icon">📱</span>
-                <span>微博</span>
-              </button>
-            </div>
-          </div>
+          
         </form>
         
         <div class="register-footer">
@@ -161,32 +132,46 @@
   
   const router = useRouter()
   const username = ref('')
-  const email = ref('')
   const phone = ref('')
   const password = ref('')
   const confirmPassword = ref('')
   const agreeTerms = ref(false)
   const showPassword = ref(false)
   const showConfirmPassword = ref(false)
-  
+  const phoneError = ref('')
+
+  const validatePhone = () => {
+    // 仅允许数字输入
+    phone.value = phone.value.replace(/[^0-9]/g, '')
+    // 简单的长度验证，例如中国大陆11位手机号
+    if (phone.value.length > 0 && phone.value.length !== 11) {
+      phoneError.value = '请输入11位手机号码'
+    } else {
+      phoneError.value = ''
+    }
+  }
+
   const canRegister = computed(() => {
     return username.value && 
-           email.value && 
            phone.value && 
            password.value && 
            confirmPassword.value && 
            password.value === confirmPassword.value && 
            password.value.length >= 6 && 
-           agreeTerms.value
+           agreeTerms.value &&
+           phone.value.length === 11 &&
+           phoneError.value === ''
   })
   
   const handleRegister = () => {
-    if (!canRegister.value) return
+    if (!canRegister.value) {
+       console.log('Registration not allowed due to validation errors.')
+       return
+    }
     
     // 模拟注册逻辑
     console.log('注册信息:', {
       username: username.value,
-      email: email.value,
       phone: phone.value,
       password: password.value
     })
@@ -257,6 +242,7 @@
   .form-group {
     display: flex;
     flex-direction: column;
+    position: relative;
   }
   
   .input-wrapper {
@@ -285,7 +271,7 @@
     outline: none;
     transition: all 0.3s ease;
   }
-  
+
   .form-input:focus {
     border-color: #e9c46a;
     box-shadow: 0 0 0 3px rgba(233, 196, 106, 0.1);
@@ -331,10 +317,32 @@
   }
   
   .error-message {
-    color: #dc3545;
-    font-size: 0.8rem;
-    margin-top: 0.5rem;
-    margin-left: 0.5rem;
+    /* 聊天气泡样式 */
+    background-color: #fff0f0; /* 淡红色背景 */
+    color: #dc3545; /* 错误文本颜色 */
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    position: absolute;
+    bottom: -35px;
+    left: 0;
+    z-index: 10;
+    max-width: 90%; /* 限制最大宽度 */
+    word-break: break-word; /* 防止长文本溢出 */
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.1); /* 添加轻微阴影 */
+    border: 1px solid rgba(220, 53, 69, 0.3);
+  }
+  
+  /* 气泡的尖角 */
+  .error-message::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 15px;
+    border-width: 0 6px 8px 6px; /* 创建三角形 */
+    border-style: solid;
+    border-color: transparent transparent #fff0f0 transparent; /* 尖角颜色与背景一致 */
+    filter: drop-shadow(0 -2px 2px rgba(220, 53, 69, 0.1)); /* 添加阴影让尖角更立体 */
   }
   
   .form-options {
@@ -490,7 +498,7 @@
     left: 50%;
     width: 0;
     height: 0;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);;
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: all 0.6s ease;
@@ -500,68 +508,13 @@
     width: 150px;
     height: 150px;
   }
-  
+
   .register-btn:hover:not(:disabled) {
     transform: translateY(-2px);
   }
   
-  .social-register {
-    margin-top: 2rem;
-  }
+
   
-  .divider {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    position: relative;
-  }
-  
-  .divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(233, 196, 106, 0.3);
-  }
-  
-  .divider-text {
-    background: #fff;
-    padding: 0 1rem;
-    color: #666;
-    font-size: 0.9rem;
-  }
-  
-  .social-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-  }
-  
-  .social-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1rem;
-    border: 1px solid rgba(233, 196, 106, 0.3);
-    border-radius: 8px;
-    background: #fff;
-    color: #314a43;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: inherit;
-  }
-  
-  .social-btn:hover {
-    border-color: #e9c46a;
-    background: rgba(233, 196, 106, 0.05);
-    transform: translateY(-1px);
-  }
-  
-  .social-icon {
-    font-size: 1.1rem;
-  }
   
   .register-footer {
     text-align: center;
