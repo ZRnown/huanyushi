@@ -210,9 +210,7 @@
     '事业发展方向？',
     '感情运势如何？',
     '财运分析',
-    '健康注意事项',
-    '今年运势如何？'
-  ])
+    '健康注意事项'  ])
   
   const goBack = () => {
     console.log('[BaziResult] goBack 跳转前：', router.currentRoute.value.fullPath)

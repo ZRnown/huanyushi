@@ -165,8 +165,8 @@ watch(inputProxy, v => emit('update:currentMessage', v))
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem; /* 调整按钮间距 */
-  margin-bottom: 1.5rem; /* 调整与输入框间距 */
-  padding-top: 1rem; /* 调整与消息列表间距 */
+  margin-bottom: 0.3rem; /* 调整与输入框间距 */
+  padding-top: 0.3rem; /* 调整与消息列表间距 */
   border-top: 1px solid #eee; /* 顶部细线 */
 }
 

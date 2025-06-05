@@ -199,15 +199,15 @@ const props = defineProps({ baziData: Object })
   color: #2c3e50;
 }
 .bazi-table {
-  background: #f9f5e8;
-  border: 1px solid #e9c46a;
+  background: #fdfcf6;
+  border: 0.5px solid #e9c46a;
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 2rem;
 }
 .table-header {
   display: grid;
-  grid-template-columns: 80px repeat(4, 1fr);
+  grid-template-columns: 120px repeat(4, 1fr);
   background: #c77f6a;
   color: #fff;
 }
@@ -216,26 +216,22 @@ const props = defineProps({ baziData: Object })
   text-align: center;
   font-weight: bold;
   font-size: 1.1rem;
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 .header-cell:last-child {
   border-right: none;
 }
 .table-row {
   display: grid;
-  grid-template-columns: 80px repeat(4, 1fr);
-  border-bottom: 1px solid #e9c46a;
+  grid-template-columns: 120px repeat(4, 1fr);
 }
-.table-row:last-child {
-  border-bottom: none;
+.bazi-table .table-row:nth-of-type(odd) {
+  background-color: #fbf7ef; /* 奇数行背景色 */
 }
 .row-label {
-  background: rgba(233, 196, 106, 0.1);
   padding: 1rem;
   text-align: center;
   font-weight: bold;
   color: #314a43;
-  border-right: 1px solid #e9c46a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -244,7 +240,6 @@ const props = defineProps({ baziData: Object })
 .pillar-cell {
   padding: 1rem;
   text-align: center;
-  border-right: 1px solid #e9c46a;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -260,12 +255,13 @@ const props = defineProps({ baziData: Object })
   gap: 0.3rem;
 }
 .tiangan, .dizhi {
-  font-size: 1.4rem;
+  font-size: 2rem;
   font-weight: bold;
 }
 .tiangan-relation, .canggan-relation {
-  font-size: 0.8rem;
-  color: #666;
+  font-size: 1rem;
+  color: #314a43;
+  font-weight: bold;
 }
 .wood { color: #53c694; }
 .fire { color: #d30505; }
@@ -282,29 +278,28 @@ const props = defineProps({ baziData: Object })
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 .canggan-char {
   font-weight: bold;
+  font-size: 16px;
 }
 .nayin, .xinyun, .zizuo, .kongwang {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #314a43;
+  font-weight: bold;
 }
 .shensha-list {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.2rem;
-  max-height: 150px;
-  overflow-y: auto;
 }
 .shensha-item {
-  font-size: 0.8rem;
-  color: #666;
-}
-.shensha-row {
-  align-items: start;
+  font-size: 0.9rem;
+  color: #314a43;
+  text-align: center;
+  font-weight: bold;
 }
 .analysis-section {
   background: #fff;
@@ -378,5 +373,20 @@ const props = defineProps({ baziData: Object })
 .geju-quality {
   font-size: 0.9rem;
   color: #666;
+}
+.shensha-row .row-label {
+  align-items: flex-start;
+  padding-top: 1rem;
+}
+.shensha-row .pillar-cell {
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 1rem;
+}
+.shensha-row .shensha-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
 }
 </style> 
