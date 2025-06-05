@@ -325,7 +325,7 @@
     gap: 20px;
     max-width: 1600px;
     margin: 0 auto;
-    height: calc(92vh - 40px); /* 调整高度以适应视口 */
+    height: calc(91vh - 40px); /* 调整高度以适应视口 */
     overflow: hidden; /* 防止整体布局滚动 */
   }
   

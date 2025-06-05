@@ -59,7 +59,7 @@ watch(inputProxy, v => emit('update:currentMessage', v))
 </script>
 <style scoped>
 .ai-chat-container {
-  height: 92%; /* 使其填充父容器高度 */
+  height: 100%; /* 使其填充父容器高度 */
   display: flex;
   flex-direction: column; /* 设置为列布局 */
   background: #fffaf0; /* 浅米黄背景 */

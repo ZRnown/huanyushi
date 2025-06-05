@@ -28,12 +28,18 @@
         <div class="header-cell">日柱</div>
         <div class="header-cell">时柱</div>
       </div>
+      <!-- 新增主星行 -->
+      <div class="table-row">
+        <div class="row-label">主星</div>
+        <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`zhuxing-${index}`">
+            <span class="tiangan-relation">{{ pillar.tiangan.relation }}</span>
+        </div>
+      </div>
       <div class="table-row">
         <div class="row-label">天干</div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`tiangan-${index}`">
           <div class="tiangan-content">
             <span class="tiangan" :class="pillar.tiangan.element">{{ pillar.tiangan.char }}</span>
-            <span class="tiangan-relation">{{ pillar.tiangan.relation }}</span>
           </div>
         </div>
       </div>
@@ -42,12 +48,6 @@
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`dizhi-${index}`">
           <div class="dizhi-content">
             <span class="dizhi" :class="pillar.dizhi.element">{{ pillar.dizhi.char }}</span>
-            <div class="dizhi-canggan">
-              <div v-for="(canggan, cgIndex) in pillar.canggan" :key="`canggan-${cgIndex}`" class="canggan-item">
-                <span class="canggan-char" :class="canggan.element">{{ canggan.char }}</span>
-                <span class="canggan-relation">{{ canggan.relation }}</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -267,11 +267,11 @@ const props = defineProps({ baziData: Object })
   font-size: 0.8rem;
   color: #666;
 }
-.wood { color: #28a745; }
-.fire { color: #dc3545; }
-.earth { color: #ffc107; }
-.metal { color: #6c757d; }
-.water { color: #007bff; }
+.wood { color: #53c694; }
+.fire { color: #d30505; }
+.earth { color: #a15c41; }
+.metal { color: #ecc058; }
+.water { color: #2e83f6; }
 .dizhi-canggan {
   display: flex;
   flex-direction: column;
