@@ -225,11 +225,9 @@
   }
   
   const saveResult = () => {
-    alert('结果已保存到案例记录')
   }
   
   const shareResult = () => {
-    alert('分享功能开发中')
   }
   
   const sendQuickQuestion = (question) => {

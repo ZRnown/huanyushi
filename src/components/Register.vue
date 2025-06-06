@@ -32,6 +32,7 @@
                 class="form-input" 
                 placeholder="请输入手机号码" 
                 required
+                maxlength="11"
                 @input="validatePhone"
               />
               <div class="input-decoration"></div>
@@ -129,6 +130,7 @@
   <script setup>
   import { ref, computed } from 'vue'
   import { useRouter } from 'vue-router'
+  import axios from 'axios'
   
   const router = useRouter()
   const username = ref('')
@@ -163,22 +165,33 @@
            phoneError.value === ''
   })
   
-  const handleRegister = () => {
-    if (!canRegister.value) {
-       console.log('Registration not allowed due to validation errors.')
-       return
+  const handleRegister = async () => {
+    if (!username.value || !password.value || !confirmPassword.value || !phone.value) {
+      return;
     }
-    
-    // 模拟注册逻辑
-    console.log('注册信息:', {
-      username: username.value,
-      phone: phone.value,
-      password: password.value
-    })
-    
-    // 这里应该调用实际的注册API
-    // 注册成功后跳转到登录页面
-    router.push('/login')
+    if (password.value !== confirmPassword.value) {
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:8088/user/register', {
+        userName: username.value,
+        passWord: password.value,
+        phone: phone.value
+      });
+
+      const result = response.data;
+
+      if (response.status === 200 && result.success) {
+        console.log('注册成功:', result);
+        router.push('/login');
+      } else {
+        console.error('注册失败:', result);
+    }
+    } catch (error) {
+      console.error('注册请求发生错误:', error);
+      const errorMessage = error.response ? error.response.data.message : error.message;
+    }
   }
   </script>
   

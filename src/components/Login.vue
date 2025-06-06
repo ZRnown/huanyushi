@@ -78,6 +78,7 @@
   <script setup>
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
+  import axios from 'axios'
   
   const router = useRouter()
   const loginIdentifier = ref('') // 用于用户名或手机号输入
@@ -85,25 +86,30 @@
   const rememberMe = ref(false)
   const showPassword = ref(false)
   
-  const handleLogin = () => {
-    // 模拟登录逻辑
-    console.log('尝试登录:', { identifier: loginIdentifier.value, password: password.value, rememberMe: rememberMe.value })
-    
-    // 判断输入是手机号还是用户名
-    const isPhoneNumber = /^[0-9]{11}$/.test(loginIdentifier.value)
-    
-    if (isPhoneNumber) {
-      console.log('使用手机号登录')
-      // TODO: 调用手机号登录API
-    } else {
-      console.log('使用用户名登录')
-      // TODO: 调用用户名登录API
+  const handleLogin = async () => {
+    if (!loginIdentifier.value || !password.value) {
+       console.log('Login not allowed due to missing credentials.')
+       return
     }
     
-    // 这里应该根据API返回的登录结果进行跳转
-    // 模拟登录成功后跳转到用户中心
-    // router.push('/user')
-     alert('登录逻辑待实现'); // 临时提示
+    try {
+      const response = await axios.post('http://localhost:8088/user/login', {
+        account: loginIdentifier.value, // 发送用户名或手机号，使用 account 键名
+        passWord: password.value
+      });
+      const result = response.data; // axios 响应数据在 response.data
+
+      if (response.status === 200 && result.success) { // axios 成功状态码通常是 200
+        // 登录成功
+        console.log('登录成功:', result);
+        router.push('/user'); // 跳转到用户中心
+      } else {
+        // 登录失败，处理错误响应
+        console.error('登录失败:', result);
+      }
+    } catch (error) {
+      console.error('登录请求发生错误:', error);
+    }
   }
   </script>
   

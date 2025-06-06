@@ -26,46 +26,31 @@
                     <span class="action-text">{{ currentLang === 'zh' ? 'EN' : '中文' }}</span>
                 </div>
                 
-                <!-- 用户中心 -->
+                <!-- 用户中心/登录入口 -->
+                <!-- 显示用户图标和文本，已登录时点击跳转个人中心，未登录跳转登录页 -->
                 <div class="action-item user-center" @click="handleUserClick">
                     <div class="action-icon">👤</div>
                     <span class="action-text">{{ isLoggedIn ? '用户' : '登录' }}</span>
-                    <div v-if="isLoggedIn" class="dropdown-arrow">▼</div>
                 </div>
                 
-                <!-- 用户下拉菜单 -->
-                <div v-if="showUserMenu && isLoggedIn" class="user-dropdown" @click.stop>
-                    <div class="dropdown-item" @click="goToUserCenter">
-                        <span class="dropdown-icon">👤</span>
-                        <span>个人中心</span>
-                    </div>
-                    <div class="dropdown-item" @click="goToVip">
-                        <span class="dropdown-icon">👑</span>
-                        <span>会员中心</span>
-                    </div>
-                    <div class="dropdown-item" @click="goToSettings">
-                        <span class="dropdown-icon">⚙️</span>
-                        <span>设置</span>
-                    </div>
-                    <div class="dropdown-divider"></div>
-                    <div class="dropdown-item logout-item" @click="logout">
-                        <span class="dropdown-icon">🚪</span>
-                        <span>退出登录</span>
-                    </div>
-                </div>
             </div>
         </div>
     </header>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const currentLang = ref('zh')
-const showUserMenu = ref(false)
-const isLoggedIn = ref(false) // 模拟登录状态
+
+// TODO: 实际应用中，isLoggedIn 和 userData 应来自全局状态管理
+const isLoggedIn = ref(true); // 模拟已登录状态
+const userData = ref({ // 占位数据，虽然头像不显示，但可能在其他地方使用
+    username: '测试用户',
+    avatarUrl: 'https://via.placeholder.com/150/a08a78/fff?text=User' 
+});
 
 const menu = [
     { label: '八字排盘', path: '/bazi', icon: '☰' },
@@ -81,39 +66,32 @@ const toggleLanguage = () => {
 
 const handleUserClick = () => {
     if (isLoggedIn.value) {
-        showUserMenu.value = !showUserMenu.value
+        // 已登录，点击跳转到个人中心
+         router.push('/user');
     } else {
+        // 未登录点击跳转到登录页
         router.push('/login')
     }
 }
 
-const goToUserCenter = () => {
-    showUserMenu.value = false
-    router.push('/user')
-}
+// 移除下拉菜单相关的函数和逻辑
+// const goToUserCenter = () => { router.push('/user'); }
+// const goToVip = () => { router.push('/vip'); }
+// const goToSettings = () => { /* 跳转到设置页面 */ }
+// const logout = () => { 
+//     isLoggedIn.value = false;
+//     // TODO: 执行退出登录逻辑，清除全局用户状态和token等
+//     router.push('/login'); 
+// }
 
-const goToVip = () => {
-    showUserMenu.value = false
-    router.push('/vip')
-}
-
-const goToSettings = () => {
-    showUserMenu.value = false
-    // 跳转到设置页面
-}
-
-const logout = () => {
-    showUserMenu.value = false
-    isLoggedIn.value = false
-    // 执行退出登录逻辑
-}
-
-// 点击外部关闭下拉菜单
-onMounted(() => {
-    document.addEventListener('click', () => {
-        showUserMenu.value = false
-    })
-})
+// 移除点击外部关闭下拉菜单的事件监听
+// onMounted(() => {
+//    // ... 其他 onMounted 逻辑 ...
+// });
+//
+// onUnmounted(() => {
+//    // ... 其他 onUnmounted 逻辑 ...
+// });
 </script>
 
 <style scoped>
@@ -251,175 +229,135 @@ onMounted(() => {
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    position: relative;
+    gap: 1.5rem;
+    /* 移除position: relative; 如果不需要其他绝对定位元素*/
 }
 
 .action-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1rem;
-    border-radius: 12px;
     cursor: pointer;
+    padding: 0.5rem 0.8rem;
+    border-radius: 12px;
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(233, 196, 106, 0.3);
 }
 
 .action-item:hover {
     background: rgba(233, 196, 106, 0.1);
-    border-color: #e9c46a;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(233, 196, 106, 0.2);
+    color: #b03a2e;
 }
 
 .action-icon {
-    font-size: 1.1rem;
-    color: #c77f6a;
+    font-size: 1.2rem;
 }
 
 .action-text {
-    font-size: 0.9rem;
-    color: #314a43;
+    font-size: 1rem;
     font-weight: 500;
 }
 
-.dropdown-arrow {
-    font-size: 0.7rem;
-    color: #666;
-    transition: transform 0.3s ease;
+/* 移除用户头像样式 */
+/*
+.user-avatar-item {
+    padding: 0.3rem;
 }
 
-.user-center:hover .dropdown-arrow {
-    transform: rotate(180deg);
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #e9c46a;
+    object-fit: cover;
+    transition: all 0.3s ease;
 }
 
-/* 用户下拉菜单 */
+.user-avatar-item:hover .user-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(233, 196, 106, 0.3);
+}
+*/
+
+/* 移除用户下拉菜单样式 */
+/*
 .user-dropdown {
     position: absolute;
-    top: calc(100% + 0.5rem);
+    top: 60px;
     right: 0;
-    background: #fff;
+    background: #fffbe6;
     border: 1px solid rgba(233, 196, 106, 0.3);
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    min-width: 160px;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 0;
+    min-width: 150px;
     z-index: 1001;
-    animation: dropdownSlide 0.3s ease;
+    animation: fadeInScale 0.3s ease;
 }
 
-@keyframes dropdownSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 .dropdown-item {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.5rem;
     padding: 0.8rem 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
     color: #314a43;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .dropdown-item:hover {
-    background: rgba(233, 196, 106, 0.1);
+    background-color: rgba(233, 196, 106, 0.1);
     color: #b03a2e;
 }
 
-.dropdown-item:first-child {
-    border-radius: 12px 12px 0 0;
-}
-
-.dropdown-item:last-child {
-    border-radius: 0 0 12px 12px;
-}
-
 .dropdown-icon {
-    font-size: 1rem;
-    color: #c77f6a;
-}
-
-.logout-item:hover {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-}
-
-.logout-item:hover .dropdown-icon {
-    color: #dc3545;
+    font-size: 1.1rem;
 }
 
 .dropdown-divider {
     height: 1px;
-    background: rgba(233, 196, 106, 0.2);
+    background: rgba(233, 196, 106, 0.3);
     margin: 0.5rem 0;
 }
 
-/* 响应式设计 */
-@media (max-width: 1024px) {
-    .nav-content {
-        padding: 0 1.5rem;
-    }
-    
-    .nav-menu {
-        gap: 0.3rem;
-    }
-    
-    .nav-menu-item {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.9rem;
-    }
-    
-    .menu-text {
-        display: none;
-    }
+.logout-item {
+    color: #dc3545;
 }
 
+.logout-item:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+*/
+
+/* 响应式调整 */
 @media (max-width: 768px) {
     .nav-content {
         padding: 0 1rem;
-        height: 60px;
     }
     
-    .nav-title {
-        font-size: 1.2rem;
-    }
-    
-    .nav-logo {
-        width: 35px;
-        height: 35px;
-        font-size: 1.1rem;
-    }
-    
-    .action-text {
-        display: none;
+    .nav-menu {
+        display: none; /* 小屏幕下隐藏导航菜单 */
     }
     
     .nav-actions {
-        gap: 0.5rem;
+        gap: 1rem;
     }
+    
+    .action-text {
+        display: none; /* 小屏幕下隐藏操作文本 */
+    }
+/* 移除小屏幕下下拉菜单位置调整 */
+/*
+    .user-dropdown {
+        right: 10px;
+    }
+*/
 }
 
-@media (max-width: 480px) {
-    .nav-menu {
-        gap: 0.2rem;
-    }
-    
-    .nav-menu-item {
-        padding: 0.4rem 0.6rem;
-    }
-    
-    .menu-icon {
-        font-size: 1rem;
-    }
-}
 </style>

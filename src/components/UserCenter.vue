@@ -57,18 +57,9 @@
                     <button class="edit-btn">编辑</button>
                   </div>
                   <div class="info-item">
-                    <span class="info-label">邮箱：</span>
-                    <span class="info-value">{{ userInfo.email }}</span>
-                    <button class="edit-btn">编辑</button>
-                  </div>
-                  <div class="info-item">
                     <span class="info-label">手机：</span>
                     <span class="info-value">{{ userInfo.phone }}</span>
                     <button class="edit-btn">编辑</button>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">注册时间：</span>
-                    <span class="info-value">{{ userInfo.registerDate }}</span>
                   </div>
                 </div>
                 
@@ -199,13 +190,30 @@
             </div>
           </div>
         </div>
+
+        <!-- 登出按钮 -->
+        <div class="logout-section">
+          <button class="logout-btn" @click="handleLogout">
+            <span class="btn-text">登出</span>
+            <span class="btn-icon">🚪</span>
+          </button>
+        </div>
+
       </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, computed } from 'vue'
-  
+  import { ref, computed, onMounted } from 'vue'
+  import { useRouter } from 'vue-router'
+  import axios from 'axios'
+  // import { ElMessage } from 'element-plus'
+  import { useUserStore } from '../stores/user'; // 导入用户 store
+
+  // 使用用户 store
+  const userStore = useUserStore();
+
+  const router = useRouter()
   const activeTab = ref('profile')
   const recordFilter = ref('all')
   
@@ -217,9 +225,9 @@
   ]
   
   const userInfo = ref({
-    username: '命理探索者',
-    email: 'user@example.com',
-    phone: '138****8888',
+    username: '加载中...',
+    email: '',
+    phone: '加载中...',
     avatar: '',
     level: '基础',
     analysisCount: 0,
@@ -253,6 +261,74 @@
     }
     return analysisRecords.value.filter(record => record.type === recordFilter.value)
   })
+
+  // 处理登出
+  const handleLogout = async () => {
+    try {
+      // 调用后端登出接口 using axios
+      const response = await axios.post('http://localhost:8088/user/logout');
+      const result = response.data; // axios 响应数据在 response.data
+
+      if (response.status === 200 && result.success) { // 检查 axios 响应状态码和后端业务状态
+        console.log('登出成功:', result);
+        // 清空 store 中的用户信息
+        userStore.clearUserInfo();
+        // 移除所有提示，直接跳转到登录页
+        router.push('/login'); 
+      } else {
+        // 登出失败，处理后端返回的错误响应
+        console.error('登出失败:', result);
+        const errorMessage = result.message || '未知错误';
+        alert(`登出失败: ${errorMessage}`); // 使用 alert 提示失败
+        // 对于登出接口返回的错误状态（非网络错误），我们不进行自动跳转，只提示用户
+      }
+    } catch (error) {
+      // 处理网络错误或请求发送失败
+      console.error('登出请求发生错误:', error);
+       // Axios 的错误信息通常在 error.response (后端有响应) 或 error.message (网络问题)
+      const errorMessage = error.response ? (error.response.data ? error.response.data.message : error.response.statusText) : error.message;
+      alert(`登出请求失败，请稍后重试: ${errorMessage || '未知错误'}`); // 使用 alert 提示网络错误
+      // 在网络错误发生时，通常意味着后端不可达或出现严重问题
+      // 此时不进行自动跳转，只提示用户
+    }
+  }
+
+  // 在组件挂载时获取用户详情
+  onMounted(async () => {
+    // 优先从 store 获取用户数据
+    if (!userStore.userInfo) {
+      console.log('store中没有用户数据，从后端获取...');
+      // 如果 store 中没有数据，则从后端获取并保存到 store
+      await userStore.fetchUserInfo();
+    }
+     // 使用 store 中的数据更新本地响应式变量或直接在模板中使用 store 数据
+     // 确保 userStore.userInfo 存在再访问其属性
+     if (userStore.userInfo) {
+        userInfo.value.username = userStore.userInfo.userName; // 从 store 获取用户名
+        userInfo.value.phone = userStore.userInfo.phone; // 从 store 获取手机号
+        // 您可能还需要更新 avatar, email, level, analysisCount, daysJoined, accuracy, registerDate, wechatBound, phoneBound 等字段
+        // userInfo.value.avatar = userStore.userInfo.avatar;
+        // userInfo.value.email = userStore.userInfo.email;
+        // ... 其他字段更新 ...
+     } else if (userStore.error) {
+         // 如果 fetchUserInfo 失败，store.userInfo 可能是 null，并且 store.error 会有错误信息
+         // 检查是否是认证失败导致的错误，如果是，提示并跳转到登录页
+         // 注意：fetchUserInfo action 内部会处理 401/403 并清空 userInfo，这里根据 store 的状态判断
+         // 简单的判断方式是检查 store 的错误信息是否与认证失败相关，或者依赖导航守卫来处理未登录状态
+         // 鉴于我们已有导航守卫，这里的错误处理主要是提示用户加载失败
+         const errorMessage = userStore.error || '加载用户详情失败';
+         alert(`加载用户详情失败: ${errorMessage}`); // 使用 alert 提示加载失败
+         // 导航守卫会在用户尝试访问 /user 时检查登录状态并重定向，这里不再重复跳转逻辑
+         // userInfo.value.username = '加载失败'; // 可以设置默认值或根据需要处理
+         // userInfo.value.phone = '加载失败';
+     }
+
+  });
+
+  // 模板可以直接使用 userStore.userInfo 或者使用本地 userInfo 变量（如上面更新的）
+  // 如果模板直接使用 store 数据，可以移除上面的本地变量更新逻辑
+  // 示例：<template> ... <div class="username">{{ userStore.userInfo?.userName || '加载中...' }}</div> ... </template>
+
   </script>
   
   <style scoped>
@@ -892,5 +968,47 @@
       font-size: 0.9rem;
     }
   }
+
+  /* 新增登出按钮样式 */
+  .logout-section {
+    margin-top: 3rem;
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(233, 196, 106, 0.2);
+  }
+  
+  .logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 2.5rem;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+  }
+  
+  .logout-btn:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+  }
+  
+  .logout-btn:active {
+     transform: translateY(-1px);
+     box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  }
+  
+  .btn-icon {
+      font-size: 1.3rem;
+  }
+
+  
   </style>
   
