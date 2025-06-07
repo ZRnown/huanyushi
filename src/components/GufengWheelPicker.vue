@@ -57,6 +57,7 @@ const containerHeight = ref(0)
 watch(
   () => props.modelValue,
   (newValue) => {
+    console.log('GufengWheelPicker: modelValue changed to', newValue, 'from', props.modelValue);
     const newIndex = props.items.indexOf(newValue)
     if (newIndex !== -1 && newIndex !== selectedIndex.value) {
       selectItem(newIndex)
@@ -72,6 +73,7 @@ const selectItem = (index) => {
   emits('selected-change', props.items[index])
   const centerOffset = (containerHeight.value - itemHeight.value) / 2
   translateY.value = centerOffset - index * itemHeight.value
+  console.log('GufengWheelPicker: selectedItem', props.items[index], 'at index', index, 'translateY', translateY.value);
 }
 
 const handleWheel = (event) => {
@@ -122,9 +124,11 @@ const updateItemHeight = () => {
       itemHeight.value = firstItem.offsetHeight
     }
     containerHeight.value = pickerContainer.value.offsetHeight
+    console.log('GufengWheelPicker: updateItemHeight called. itemHeight:', itemHeight.value, 'containerHeight:', containerHeight.value);
   }
 }
 onMounted(() => {
+  console.log('GufengWheelPicker: onMounted called.');
   nextTick(() => {
     updateItemHeight()
     selectItem(selectedIndex.value)

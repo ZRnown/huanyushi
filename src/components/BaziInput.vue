@@ -126,21 +126,21 @@
               
               <div class="picker-content">
                 <div class="picker-columns">
-                  <template v-if="inputType === 'solar'">
+                  <template v-if="inputType === 'solar'" :key="'solar-picker'">
                     <GufengWheelPicker :items="solarYears" v-model="tempSolarYear" unit="年" />
                     <GufengWheelPicker :items="solarMonths" v-model="tempSolarMonth" unit="月" />
                     <GufengWheelPicker :items="solarDays" v-model="tempSolarDay" unit="日" />
                     <GufengWheelPicker :items="solarHours" v-model="tempSolarHour" unit="时" />
                     <GufengWheelPicker :items="solarMinutes" v-model="tempSolarMinute" unit="分" />
                   </template>
-                  <template v-else-if="inputType === 'lunar'">
+                  <template v-else-if="inputType === 'lunar'" :key="'lunar-picker'">
                     <GufengWheelPicker :items="lunarYears" v-model="tempLunarYear" unit="年" />
                     <GufengWheelPicker :items="lunarMonths" v-model="tempLunarMonth" unit="月" />
                     <GufengWheelPicker :items="lunarDays" v-model="tempLunarDay" unit="日" />
                     <GufengWheelPicker :items="lunarHours" v-model="tempLunarHour" unit="时" />
                     <GufengWheelPicker :items="lunarMinutes" v-model="tempLunarMinute" unit="分" />
                   </template>
-                  <template v-else-if="inputType === 'bazi'">
+                  <template v-else-if="inputType === 'bazi'" :key="'bazi-picker'">
                     <GufengWheelPicker :items="ganzhiList" v-model="tempBaziYear" unit="年" />
                     <GufengWheelPicker :items="ganzhiList" v-model="tempBaziMonth" unit="月" />
                     <GufengWheelPicker :items="ganzhiList" v-model="tempBaziDay" unit="日" />
@@ -219,12 +219,25 @@ function getBeijingNow() {
 }
 
 const now = getBeijingNow()
-// 年份范围：公元1年到今年
-const solarYears = Array.from({ length: now.getFullYear() }, (_, i) => i + 1)
-const lunarYears = Array.from({ length: now.getFullYear() }, (_, i) => i + 1)
-const solarMonths = Array.from({ length: 12 }, (_, i) => i + 1)
-const solarHours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
-const solarMinutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
+
+// 确保所有静态数组都通过ref包裹，并提前声明，避免渲染时序问题
+const solarYears = ref(Array.from({ length: now.getFullYear() }, (_, i) => i + 1))
+const lunarYears = ref(Array.from({ length: now.getFullYear() - 100 + 100 * 2 + 1 }, (_, i) => now.getFullYear() - 100 + i))
+const solarMonths = ref(Array.from({ length: 12 }, (_, i) => i + 1))
+const solarHours = ref(Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')))
+const solarMinutes = ref(Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')))
+const lunarMonths = ref(Array.from({ length: 12 }, (_, i) => i + 1))
+const lunarHours = ref(Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')))
+const lunarMinutes = ref(Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')))
+
+const ganzhiList = [
+  '甲子','乙丑','丙寅','丁卯','戊辰','己巳','庚午','辛未','壬申','癸酉',
+  '甲戌','乙亥','丙子','丁丑','戊寅','己卯','庚辰','辛巳','壬午','癸未',
+  '甲申','乙酉','丙戌','丁亥','戊子','己丑','庚寅','辛卯','壬辰','癸巳',
+  '甲午','乙未','丙申','丁酉','戊戌','己亥','庚子','辛丑','壬寅','癸卯',
+  '甲辰','乙巳','丙午','丁未','戊申','己酉','庚戌','辛亥','壬子','癸丑',
+  '甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥'
+]
 
 const solarYear = ref(now.getFullYear())
 const solarMonth = ref(now.getMonth() + 1)
@@ -247,15 +260,6 @@ const baziYear = ref('')
 const baziMonth = ref('')
 const baziDay = ref('')
 const baziHour = ref('')
-
-const ganzhiList = [
-  '甲子','乙丑','丙寅','丁卯','戊辰','己巳','庚午','辛未','壬申','癸酉',
-  '甲戌','乙亥','丙子','丁丑','戊寅','己卯','庚辰','辛巳','壬午','癸未',
-  '甲申','乙酉','丙戌','丁亥','戊子','己丑','庚寅','辛卯','壬辰','癸巳',
-  '甲午','乙未','丙申','丁酉','戊戌','己亥','庚子','辛丑','壬寅','癸卯',
-  '甲辰','乙巳','丙午','丁未','戊申','己酉','庚戌','辛亥','壬子','癸丑',
-  '甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥'
-]
 
 // 临时变量
 const tempSolarYear = ref(solarYear.value)
@@ -306,6 +310,32 @@ watch([tempLunarYear, tempLunarMonth], ([y, m]) => {
   if (tempLunarDay.value > days) tempLunarDay.value = days
 })
 
+// 监听 inputType 变化，同步临时日期变量
+watch(inputType, (newInputType) => {
+  if (newInputType === 'solar') {
+    tempSolarYear.value = solarYear.value
+    tempSolarMonth.value = solarMonth.value
+    tempSolarDay.value = solarDay.value
+    tempSolarHour.value = solarHour.value
+    tempSolarMinute.value = solarMinute.value
+  } else if (newInputType === 'lunar') {
+    // 打印lunarHours和lunarMinutes的值，用于调试
+    console.log('Debug: lunarHours in watch', lunarHours);
+    console.log('Debug: lunarMinutes in watch', lunarMinutes);
+
+    tempLunarYear.value = lunarYear.value
+    tempLunarMonth.value = lunarMonth.value
+    tempLunarDay.value = lunarDay.value
+    tempLunarHour.value = lunarHour.value
+    tempLunarMinute.value = lunarMinute.value
+  } else if (newInputType === 'bazi') {
+    tempBaziYear.value = baziYear.value || ganzhiList[0];
+    tempBaziMonth.value = baziMonth.value || ganzhiList[0];
+    tempBaziDay.value = baziDay.value || ganzhiList[0];
+    tempBaziHour.value = baziHour.value || ganzhiList[0];
+  }
+})
+
 // 辅助函数
 const getDateLabel = () => {
   const labels = {
@@ -346,6 +376,7 @@ const getPickerTitle = () => {
 }
 
 function openDatePicker() {
+  console.log('openDatePicker called for inputType:', inputType.value);
   if (inputType.value === 'solar') {
     tempSolarYear.value = solarYear.value
     tempSolarMonth.value = solarMonth.value
@@ -359,10 +390,10 @@ function openDatePicker() {
     tempLunarHour.value = lunarHour.value
     tempLunarMinute.value = lunarMinute.value
   } else if (inputType.value === 'bazi') {
-    tempBaziYear.value = baziYear.value
-    tempBaziMonth.value = baziMonth.value
-    tempBaziDay.value = baziDay.value
-    tempBaziHour.value = baziHour.value
+    tempBaziYear.value = baziYear.value || ganzhiList[0]
+    tempBaziMonth.value = baziMonth.value || ganzhiList[0]
+    tempBaziDay.value = baziDay.value || ganzhiList[0]
+    tempBaziHour.value = baziHour.value || ganzhiList[0]
   }
   showDatePicker.value = true
 }
