@@ -92,9 +92,9 @@
               <span class="checkmark"></span>
               <span class="checkbox-text">
                 我已阅读并同意
-                <a href="#" class="terms-link">《用户协议》</a>
+                <router-link to="/agreement" class="terms-link">《用户协议》</router-link>
                 和
-                <a href="#" class="terms-link">《隐私政策》</a>
+                <router-link to="/privacy" class="terms-link">《隐私政策》</router-link>
               </span>
             </label>
           </div>

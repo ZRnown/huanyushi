@@ -76,7 +76,7 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue'
+  import { ref, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import axios from 'axios'
   
@@ -102,6 +102,21 @@
       if (response.status === 200 && result.success) { // axios 成功状态码通常是 200
         // 登录成功
         console.log('登录成功:', result);
+
+        // 根据"记住我"的状态保存或清除凭据
+        if (rememberMe.value) {
+          localStorage.setItem('rememberedAccount', loginIdentifier.value);
+          // 注意：直接保存密码到 localStorage 存在安全风险，生产环境不推荐
+          // 通常会保存一个加密的 token 或用户的唯一标识，用于自动登录
+          // 这里为了实现功能，暂时保存明文密码，请您在实际项目中考虑安全性
+          localStorage.setItem('rememberedPassword', password.value);
+          console.log('记住我：账号和密码已保存到localStorage');
+        } else {
+          localStorage.removeItem('rememberedAccount');
+          localStorage.removeItem('rememberedPassword');
+          console.log('未记住我：已清除localStorage中的账号和密码');
+        }
+
         router.push('/user'); // 跳转到用户中心
       } else {
         // 登录失败，处理错误响应
@@ -111,6 +126,19 @@
       console.error('登录请求发生错误:', error);
     }
   }
+
+  // 组件挂载时检查是否有保存的凭据
+  onMounted(() => {
+    const rememberedAccount = localStorage.getItem('rememberedAccount');
+    const rememberedPassword = localStorage.getItem('rememberedPassword');
+    
+    if (rememberedAccount && rememberedPassword) {
+      loginIdentifier.value = rememberedAccount;
+      password.value = rememberedPassword;
+      rememberMe.value = true; // 自动勾选记住我
+      console.log('已从localStorage自动填充账号和密码');
+    }
+  });
   </script>
   
   <style scoped>

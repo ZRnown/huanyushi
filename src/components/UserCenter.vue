@@ -279,7 +279,6 @@
         // 登出失败，处理后端返回的错误响应
         console.error('登出失败:', result);
         const errorMessage = result.message || '未知错误';
-        alert(`登出失败: ${errorMessage}`); // 使用 alert 提示失败
         // 对于登出接口返回的错误状态（非网络错误），我们不进行自动跳转，只提示用户
       }
     } catch (error) {
@@ -287,7 +286,6 @@
       console.error('登出请求发生错误:', error);
        // Axios 的错误信息通常在 error.response (后端有响应) 或 error.message (网络问题)
       const errorMessage = error.response ? (error.response.data ? error.response.data.message : error.response.statusText) : error.message;
-      alert(`登出请求失败，请稍后重试: ${errorMessage || '未知错误'}`); // 使用 alert 提示网络错误
       // 在网络错误发生时，通常意味着后端不可达或出现严重问题
       // 此时不进行自动跳转，只提示用户
     }
@@ -317,7 +315,6 @@
          // 简单的判断方式是检查 store 的错误信息是否与认证失败相关，或者依赖导航守卫来处理未登录状态
          // 鉴于我们已有导航守卫，这里的错误处理主要是提示用户加载失败
          const errorMessage = userStore.error || '加载用户详情失败';
-         alert(`加载用户详情失败: ${errorMessage}`); // 使用 alert 提示加载失败
          // 导航守卫会在用户尝试访问 /user 时检查登录状态并重定向，这里不再重复跳转逻辑
          // userInfo.value.username = '加载失败'; // 可以设置默认值或根据需要处理
          // userInfo.value.phone = '加载失败';
