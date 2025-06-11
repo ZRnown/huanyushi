@@ -13,8 +13,8 @@
         </div>
         <div class="info-item">
           <span class="info-label">性别：</span>
-          <span class="info-value gender" :class="baziData.gender">
-            {{ baziData.gender === 'male' ? '乾造 (男)' : '坤造 (女)' }}
+          <span class="info-value gender" :class="baziData.genderClass">
+            {{ baziData.gender }}
           </span>
         </div>
       </div>
@@ -147,6 +147,8 @@
 </template>
 <script setup>
 import { defineProps } from 'vue'
+import{Solar,Lunar,EightChar} from 'lunar-javascript'
+
 const props = defineProps({ baziData: Object })
 </script>
 

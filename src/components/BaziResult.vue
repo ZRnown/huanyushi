@@ -67,143 +67,110 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, nextTick, watch, onUnmounted } from 'vue'
+  import { ref, onMounted, nextTick, watch, onUnmounted, computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import BasicInfo from './BaziResult/BasicInfo.vue'
   import PersonalityReport from './BaziResult/PersonalityReport.vue'
   import FortuneReport from './BaziResult/FortuneReport.vue'
   import DeepReport from './BaziResult/DeepReport.vue'
   import AIChat from './BaziResult/AIChat.vue'
+  import { useBaziStore } from '../stores/bazi'
+  import { Solar, Lunar } from 'lunar-javascript'
+  
   const router = useRouter()
   const route = useRoute()
+  const baziStore = useBaziStore()
+  
   const chatMessages = ref([])
   const currentMessage = ref('')
   const isTyping = ref(false)
   const chatMessagesRef = ref(null)
   const activeTab = ref('basic')
   
-  // 示例八字数据
-  const baziData = ref({
-    lunarDate: '2025年五月初九 申时 (乾造)',
-    solarDate: '2025年6月4日 16:41',
-    gender: 'male',
-    pillars: [
-      {
-        tiangan: { char: '戊', element: 'earth', relation: '劫财' },
-        dizhi: { char: '寅', element: 'wood' },
-        canggan: [
-          { char: '甲', element: 'wood', relation: '正官' },
-          { char: '丙', element: 'fire', relation: '正印' },
-          { char: '戊', element: 'earth', relation: '劫财' }
-        ],
-        nayin: '城头土',
-        xinyun: '死',
-        zizuo: '长生',
-        kongwang: '申酉',
-        shensha: ['国印', '亡神', '天德合', '月德合', '天乙贵人', '太极贵人', '福星贵人', '金舆', '华盖', '血刃', '天喜', '元辰']
-      },
-      {
-        tiangan: { char: '己', element: 'earth', relation: '比肩' },
-        dizhi: { char: '未', element: 'earth' },
-        canggan: [
-          { char: '己', element: 'earth', relation: '比肩' },
-          { char: '丁', element: 'fire', relation: '偏印' },
-          { char: '乙', element: 'wood', relation: '七杀' }
-        ],
-        nayin: '天上火',
-        xinyun: '冠带',
-        zizuo: '冠带',
-        kongwang: '子丑',
-        shensha: ['天德合', '月德合', '桃花', '九丑', '童子煞']
-      },
-      {
-        tiangan: { char: '己', element: 'earth', relation: '日主' },
-        dizhi: { char: '卯', element: 'wood' },
-        canggan: [
-          { char: '乙', element: 'wood', relation: '七杀' }
-        ],
-        nayin: '城头土',
-        xinyun: '病',
-        zizuo: '病',
-        kongwang: '申酉',
-        shensha: ['天乙贵人', '太极贵人', '福星贵人', '金舆', '华盖', '血刃', '天喜', '元辰']
-      },
-      {
-        tiangan: { char: '辛', element: 'metal', relation: '食神' },
-        dizhi: { char: '未', element: 'earth' },
-        canggan: [
-          { char: '己', element: 'earth', relation: '比肩' },
-          { char: '丁', element: 'fire', relation: '偏印' },
-          { char: '乙', element: 'wood', relation: '七杀' }
-        ],
-        nayin: '路旁土',
-        xinyun: '冠带',
-        zizuo: '衰',
-        kongwang: '戌亥',
-        shensha: ['童子煞']
+  // 根据 baziStore 中的数据计算 baziData
+  const baziData = computed(() => {
+    const input = baziStore.getBaziInputData;
+  
+    let solarDisplay = '';
+    let lunarDisplay = '';
+    const genderText = input.gender === '男' ? '乾造 (男)' : '坤造 (女)';
+    const genderClass = input.gender === '男' ? 'male' : 'female';
+  
+    if (input.inputType === 'solar' && input.solarDate.year !== null) {
+      // 从公历日期创建 Solar 对象
+      const solar = Solar.fromYmdHms(
+        input.solarDate.year,
+        input.solarDate.month,
+        input.solarDate.day,
+        parseInt(input.solarDate.hour),
+        parseInt(input.solarDate.minute),
+        0 // 秒，默认为 0
+      );
+      solarDisplay = solar.toFullString();
+      lunarDisplay = solar.getLunar().toString();
+    } else if (input.inputType === 'lunar' && input.lunarDate.year !== null) {
+      // 从农历日期创建 Lunar 对象
+      let lunar = Lunar.fromYmd(
+        input.lunarDate.year,
+        input.lunarDate.month,
+        input.lunarDate.day,
+        false // 假设不是闰月，如果需要支持闰月，需要 baziStore 提供 isLeapMonth 字段
+      );
+      
+      let tempSolar = lunar.getSolar(); // 获取对应的阳历日期 (不含时分)
+  
+      // 如果有农历的时分信息，则创建带有时间信息的 Solar 对象，再获取对应的 Lunar 对象
+      if (input.lunarDate.hour !== null && input.lunarDate.minute !== null) {
+        tempSolar = Solar.fromYmdHms(
+          tempSolar.getYear(),
+          tempSolar.getMonth(),
+          tempSolar.getDay(),
+          parseInt(input.lunarDate.hour),
+          parseInt(input.lunarDate.minute),
+          0
+        );
+        lunar = tempSolar.getLunar(); // 获取带有时间信息的农历对象
       }
-    ],
-    wuxingStats: {
-      金: { count: 1, percentage: 10 },
-      木: { count: 4, percentage: 40 },
-      火: { count: 3, percentage: 30 },
-      土: { count: 5, percentage: 50 },
-      水: { count: 0, percentage: 0 }
-    },
-    rizhu: { char: '己', element: '土' },
-    strength: { type: 'weak', desc: '身弱' },
-    favoriteGod: ['水', '木'],
-    yinYangAnalysis: {
-      yin: 5,
-      yang: 3,
-      yinPercentage: 62.5,
-      yangPercentage: 37.5,
-      description: '八字偏阴的人性格细腻，心思缜密，但行动上容易显得犹豫不决。生活中喜欢细致的安排，但在关键时刻可能缺乏魄力。感情上依赖性较强，但能够持久。'
-    },
-    wuxingAnalysis: '五行缺水的你，情感上可能比较保守，不善于表达内心的想法。偶尔会有情绪波动，适应能力较弱，面对变化可能感到压力。生活中，你需要更多地培养自己的灵活性和包容心。五行土旺的你，性格稳重，值得信赖。但有时你可能显得过于保守，害怕改变。尝试跳出舒适区，勇敢地追求新的可能性，将会为你的人生带来更多的机会。',
-    shishenAnalysis: {
-      description: '缺少财星的男命在婚姻中往往对物质需求较低，容易忽略伴侣的经济期待。你的婚姻可能会因为财务问题产生矛盾，尤其在家庭经济责任分担上较为被动。你需要更加重视婚姻中的物质基础，提升理财能力，才能维持婚姻的稳定。 财星代表财富和资源，缺少财星的人对金钱和物质的敏感度较低，通常不擅长理财，容易错失财富积累的机会。 你在事业上更倾向于依靠长期稳定的努力和稳健的投资来积累财富，而非快速致富。由于对物质追求不强烈，你可能更适合从事与精神、学术或创意相关的职业，较少依赖物质导向的行业。 需要注意的是，尽管财富积累速度较慢，但通过长期规划和自律，也可以逐步实现财务稳定。 官杀过旺意味着你的人生常常充满压力，事业上容易被外界环境或上级的要求束缚，往往处于紧张的工作氛围中，虽然晋升机会较多，但压力极大，容易在职场上感觉疲惫不堪。 婚姻中，官杀过旺的女性容易遇到强势的伴侣，夫妻关系中常处于被动，感情压力大。你需要注意调整心态，避免过度承受外界的压力，以免影响健康和情绪。 比劫过旺意味着你在事业中竞争意识强，容易与同事或朋友产生摩擦，事业上虽然充满动力，但也容易因为过度坚持自我而错失团队合作的机会。 你在财富上容易过度分散，因帮助他人而导致自己的财务状况不佳。 婚姻中，你可能过于强势，导致夫妻关系紧张。你需要学会适当放下，才能在事业和婚姻中取得更好的平衡。'
-    },
-    shengxiao: {
-      name: '虎',
-      icon: '🐯',
-      traits: [
-        { title: '勇气可嘉', description: '褐虎充满无畏勇气，面对任何挑战都勇往直前。' },
-        { title: '领导魅力', description: '天生具备领导才能，能够带领团队走向成功。' },
-        { title: '热情奔放', description: '对生活充满热情，总能感染和鼓舞身边的人。' },
-        { title: '情绪多变', description: '容易急躁，情绪波动较大，需学会冷静处理问题。' },
-        { title: '虎猴争锋', description: '和属猴的朋友容易产生竞争，需多些理解和包容。' }
-      ]
-    },
-    geju: {
-      name: '建禄格',
-      quality: '格局良好',
-      description: '作为建禄格的人，你天生自强，对自己充满信心。你按照自己的节奏行事，拥有绝不改变决定的坚定性格。建禄格的含义代表"建功立业"，这也说明了你拥有强烈的事业心，并致力于实现自己的目标。你精力充沛、非常有主见，独立性极强，很少依赖他人。 你拥有强大的自立心，坚持初心，态度坚决，但往往不太容易接受他人的意见。你习惯独自完成事情，即使在团体中，也不太习惯迎合其他成员。你始终坚持表达自己的主张，几乎在任何情况下你都会设法表达自己的看法和观点。你有明确的世界观，非常注重胜败，用自己的双手开拓一片属于自己的天地。 建禄格的人适合从事需要强烈独立性和自主性的职业，如创业者、自由职业者、高管、律师、建筑师、专业技术人员等。这些职业能让你的自主性和决断力得到充分发挥。同时，你也适合领导和管理的角色，能够带领团队实现目标。 继续保持你的自强和坚定，用你的智慧和毅力，实现自己的人生目标。你的决心和努力终会让你在事业和生活中获得令人瞩目的成就。'
-    },
-    dayun: [
-      { ageRange: '0-9岁', yearRange: '2025-2034', ganzhi: '庚辰', wuxing: '金土', luck: '吉' },
-      { ageRange: '10-19岁', yearRange: '2035-2044', ganzhi: '辛巳', wuxing: '金火', luck: '平' },
-      { ageRange: '20-29岁', yearRange: '2045-2054', ganzhi: '壬午', wuxing: '水火', luck: '凶' },
-      { ageRange: '30-39岁', yearRange: '2055-2064', ganzhi: '癸未', wuxing: '水土', luck: '吉' },
-      { ageRange: '40-49岁', yearRange: '2065-2074', ganzhi: '甲申', wuxing: '木金', luck: '平' },
-      { ageRange: '50-59岁', yearRange: '2075-2084', ganzhi: '乙酉', wuxing: '木金', luck: '吉' }
-    ],
-    liunian: [
-      { year: '2025', age: '1岁', ganzhi: '乙巳', wuxing: '木火', fortune: '平' },
-      { year: '2026', age: '2岁', ganzhi: '丙午', wuxing: '火火', fortune: '吉' },
-      { year: '2027', age: '3岁', ganzhi: '丁未', wuxing: '火土', fortune: '吉' },
-      { year: '2028', age: '4岁', ganzhi: '戊申', wuxing: '土金', fortune: '凶' },
-      { year: '2029', age: '5岁', ganzhi: '己酉', wuxing: '土金', fortune: '平' }
-    ],
-    deepAnalysis: {
-      career: '你的八字中官杀过旺，适合从事需要严谨、规范的工作，如法律、行政、管理等领域。由于比劫也较强，你具有较强的竞争意识和进取心，能够在职场中不断提升自己。但需要注意的是，过强的竞争意识可能导致与同事关系紧张，建议学会适当妥协和团队合作。在30-39岁这个阶段，你的事业将迎来较好的发展机会，可以考虑在这个时期进行重要的职业规划或转型。',
-      wealth: '你的八字中缺少财星，对金钱和物质的敏感度较低，不太擅长理财和财富积累。建议通过学习财务知识，提高自己的理财能力。你更适合通过稳定的工作和长期投资来积累财富，而不是投机取巧。在40-49岁这个阶段，你的财运会有所好转，可以考虑在这个时期进行一些稳健的投资。',
-      marriage: '你的八字中官杀过旺，在婚姻中可能会遇到较为强势的伴侣，或者自己在婚姻中处于被动地位。同时，比劫过旺也可能导致你在婚姻中过于强势，容易与伴侣产生冲突。建议在婚姻中学会适当妥协和沟通，尊重伴侣的意见和感受。在选择伴侣时，可以考虑性格温和、包容度高的人，这样能够更好地平衡你的性格特点。',
-      health: '你的八字中五行缺水，可能会出现肾脏、泌尿系统方面的问题。同时，土旺容易导致脾胃功能失调，建议注意饮食规律，避免过度劳累。在情绪方面，你可能容易出现焦虑、紧张等情绪问题，建议通过运动、冥想等方式来调节情绪。在20-29岁这个阶段，你的健康状况可能会出现一些问题，需要特别注意保养。',
-      education: '你的八字中官杀较强，学习能力较好，但可能会因为压力过大而影响学习效果。建议在学习过程中适当放松，避免给自己过大的压力。你适合系统性、规范性较强的学科，如法律、医学、工程等。在10-19岁这个阶段，你的学业发展较为顺利，可以考虑在这个时期进行重要的学业规划。',
-      relationships: '你的八字中比劫过旺，在人际关系中可能会表现得较为强势，容易与他人产生冲突。同时，官杀过旺也可能导致你在人际交往中过于拘谨或者压抑自己的真实想法。建议在人际交往中学会适当妥协和包容，尊重他人的意见和感受。在与属猴的人交往时，可能会产生一些竞争关系，需要多一些理解和包容。'
+      solarDisplay = tempSolar.toFullString();
+      lunarDisplay = lunar.toString();
+    } else if (input.inputType === 'bazi') {
+      const { yearGanZhi, monthGanZhi, dayGanZhi, hourGanZhi } = input.baziData;
+      solarDisplay = `四柱八字: ${yearGanZhi} ${monthGanZhi} ${dayGanZhi} ${hourGanZhi}`;
+      lunarDisplay = `四柱八字: ${yearGanZhi} ${monthGanZhi} ${dayGanZhi} ${hourGanZhi}`;
+    } else if (input.inputType === 'ai') {
+      solarDisplay = `AI识别文本: ${input.aiText || '未输入'}`;
+      lunarDisplay = `AI识别文本: ${input.aiText || '未输入'}`;
     }
-  })
+  
+    // 占位数据：由于排盘逻辑暂未实现，这里提供空或默认结构
+    // BasicInfo 组件需要这些字段，所以即使为空也需要提供结构
+    return {
+      lunarDate: lunarDisplay,
+      solarDate: solarDisplay,
+      gender: genderText,
+      genderClass: genderClass,
+      userName: input.userName,
+      address: input.address,
+      pillars: [
+        { tiangan: { char: '', element: '', relation: '' }, dizhi: { char: '', element: '' }, canggan: [], nayin: '', xinyun: '', zizuo: '', kongwang: '', shensha: [] },
+        { tiangan: { char: '', element: '', relation: '' }, dizhi: { char: '', element: '' }, canggan: [], nayin: '', xinyun: '', zizuo: '', kongwang: '', shensha: [] },
+        { tiangan: { char: '', element: '', relation: '' }, dizhi: { char: '', element: '' }, canggan: [], nayin: '', xinyun: '', zizuo: '', kongwang: '', shensha: [] },
+        { tiangan: { char: '', element: '', relation: '' }, dizhi: { char: '', element: '' }, canggan: [], nayin: '', xinyun: '', zizuo: '', kongwang: '', shensha: [] }
+      ],
+      wuxingStats: { 金: { count: 0, percentage: 0 }, 木: { count: 0, percentage: 0 }, 火: { count: 0, percentage: 0 }, 土: { count: 0, percentage: 0 }, 水: { count: 0, percentage: 0 } },
+      rizhu: { char: '日主', element: '' },
+      strength: { type: '', desc: '' },
+      favoriteGod: [],
+      yinYangAnalysis: { yin: 0, yang: 0, yinPercentage: 0, yangPercentage: 0, description: '' },
+      wuxingAnalysis: '',
+      shishenAnalysis: { description: '' },
+      shengxiao: { name: '', icon: '', traits: [] },
+      geju: { name: '', quality: '', description: '' },
+      dayun: [],
+      liunian: [],
+      deepAnalysis: { career: '', wealth: '', marriage: '', health: '', education: '', relationships: '' }
+    };
+  });
   
   const quickQuestions = ref([
     '我的性格特点如何？',
@@ -213,14 +180,12 @@
     '健康注意事项'  ])
   
   const goBack = () => {
-    console.log('[BaziResult] goBack 跳转前：', router.currentRoute.value.fullPath)
     if (router.currentRoute.value.path !== '/bazi') {
       router.push('/bazi')
-      console.log('[BaziResult] goBack 跳转到 /bazi')
+      baziStore.clearBaziInput();
     } else {
-      // 临时强制刷新
-      window.location.href = '/bazi'
-      console.log('[BaziResult] goBack 已经在 /bazi，强制刷新')
+      baziStore.clearBaziInput();
+      router.go(0);
     }
   }
   
@@ -288,7 +253,6 @@
   }
   
   onMounted(() => {
-    console.log('[BaziResult] 组件挂载，当前路由：', route.fullPath)
     chatMessages.value.push({
       type: 'ai',
       text: '您好！我是唤雨师AI助手。我已经为您分析了八字命盘，您可以点击下方的快捷问题，或者直接输入您想了解的内容。我会根据您的八字特点为您提供专业的解答。',
@@ -297,13 +261,11 @@
   })
 
   onUnmounted(() => {
-    console.log('[BaziResult] 组件卸载，当前路由：', route.fullPath)
   })
 
   watch(
     () => route.fullPath,
     (newPath, oldPath) => {
-      console.log(`[BaziResult] 路由变化: ${oldPath} -> ${newPath}`)
     }
   )
   </script>

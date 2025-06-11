@@ -193,7 +193,10 @@
 import { ref, watch, computed } from 'vue'
 import GufengWheelPicker from './GufengWheelPicker.vue'
 import { useRouter } from 'vue-router'
+import { useBaziStore } from '../stores/bazi'
+
 const router = useRouter()
+const baziStore = useBaziStore()
 
 const tabs = [
   { label: 'AI识别', value: 'ai' },
@@ -202,11 +205,31 @@ const tabs = [
   { label: '四柱八字', value: 'bazi' }
 ]
 
-const inputType = ref('ai')
-const aiText = ref('')
-const userName = ref('')
-const address = ref('')
-const gender = ref('男')
+const inputType = computed({
+  get: () => baziStore.inputType,
+  set: (val) => baziStore.setInputType(val),
+});
+
+const aiText = computed({
+  get: () => baziStore.aiText,
+  set: (val) => baziStore.setAiText(val),
+});
+
+const userName = computed({
+  get: () => baziStore.userName,
+  set: (val) => baziStore.setUserName(val),
+});
+
+const address = computed({
+  get: () => baziStore.address,
+  set: (val) => baziStore.setAddress(val),
+});
+
+const gender = computed({
+  get: () => baziStore.gender,
+  set: (val) => baziStore.setGender(val),
+});
+
 const showDatePicker = ref(false)
 
 // 获取当前北京时间
@@ -255,7 +278,6 @@ const lunarMinute = ref(now.getMinutes().toString().padStart(2, '0'))
 const lunarDisplay = ref('')
 const lunarDays = ref([])
 
-const showBaziPicker = ref(false)
 const baziYear = ref('')
 const baziMonth = ref('')
 const baziDay = ref('')
@@ -313,38 +335,25 @@ watch([tempLunarYear, tempLunarMonth], ([y, m]) => {
 // 监听 inputType 变化，同步临时日期变量
 watch(inputType, (newInputType) => {
   if (newInputType === 'solar') {
-    tempSolarYear.value = solarYear.value
-    tempSolarMonth.value = solarMonth.value
-    tempSolarDay.value = solarDay.value
-    tempSolarHour.value = solarHour.value
-    tempSolarMinute.value = solarMinute.value
+    tempSolarYear.value = baziStore.solarDate.year || solarYear.value;
+    tempSolarMonth.value = baziStore.solarDate.month || solarMonth.value;
+    tempSolarDay.value = baziStore.solarDate.day || solarDay.value;
+    tempSolarHour.value = baziStore.solarDate.hour || solarHour.value;
+    tempSolarMinute.value = baziStore.solarDate.minute || solarMinute.value;
   } else if (newInputType === 'lunar') {
-    // 打印lunarHours和lunarMinutes的值，用于调试
-    console.log('Debug: lunarHours in watch', lunarHours);
-    console.log('Debug: lunarMinutes in watch', lunarMinutes);
-
-    tempLunarYear.value = lunarYear.value
-    tempLunarMonth.value = lunarMonth.value
-    tempLunarDay.value = lunarDay.value
-    tempLunarHour.value = lunarHour.value
-    tempLunarMinute.value = lunarMinute.value
+    tempLunarYear.value = baziStore.lunarDate.year || lunarYear.value;
+    tempLunarMonth.value = baziStore.lunarDate.month || lunarMonth.value;
+    tempLunarDay.value = baziStore.lunarDate.day || lunarDay.value;
+    tempLunarHour.value = baziStore.lunarDate.hour || lunarHour.value;
+    tempLunarMinute.value = baziStore.lunarDate.minute || lunarMinute.value;
   } else if (newInputType === 'bazi') {
-    tempBaziYear.value = baziYear.value || ganzhiList[0];
-    tempBaziMonth.value = baziMonth.value || ganzhiList[0];
-    tempBaziDay.value = baziDay.value || ganzhiList[0];
-    tempBaziHour.value = baziHour.value || ganzhiList[0];
+    tempBaziYear.value = baziStore.baziData.yearGanZhi || ganzhiList[0];
+    tempBaziMonth.value = baziStore.baziData.monthGanZhi || ganzhiList[0];
+    tempBaziDay.value = baziStore.baziData.dayGanZhi || ganzhiList[0];
+    tempBaziHour.value = baziStore.baziData.hourGanZhi || ganzhiList[0];
   }
-})
+}, { immediate: true });
 
-// 辅助函数
-const getDateLabel = () => {
-  const labels = {
-    solar: '公历生日',
-    lunar: '农历生日',
-    bazi: '四柱八字'
-  }
-  return labels[inputType.value] || '出生时间'
-}
 
 const getDatePlaceholder = () => {
   const placeholders = {
@@ -356,15 +365,16 @@ const getDatePlaceholder = () => {
 }
 
 const getDisplayDate = () => {
-  if (inputType.value === 'solar') return solarDisplay.value
-  if (inputType.value === 'lunar') return lunarDisplay.value
+  if (inputType.value === 'solar') return baziStore.solarDisplay;
+  if (inputType.value === 'lunar') return baziStore.lunarDisplay;
   if (inputType.value === 'bazi') {
-    return baziYear.value && baziMonth.value && baziDay.value && baziHour.value
-      ? `${baziYear.value}年 ${baziMonth.value}月 ${baziDay.value}日 ${baziHour.value}时`
-      : ''
+    const { yearGanZhi, monthGanZhi, dayGanZhi, hourGanZhi } = baziStore.baziData;
+    return yearGanZhi && monthGanZhi && dayGanZhi && hourGanZhi
+      ? `${yearGanZhi}年 ${monthGanZhi}月 ${dayGanZhi}日 ${hourGanZhi}时`
+      : '';
   }
-  return ''
-}
+  return '';
+};
 
 const getPickerTitle = () => {
   const titles = {
@@ -376,51 +386,57 @@ const getPickerTitle = () => {
 }
 
 function openDatePicker() {
-  console.log('openDatePicker called for inputType:', inputType.value);
+  showDatePicker.value = true;
+  // 在打开选择器时，确保临时变量与 store 中的值同步
   if (inputType.value === 'solar') {
-    tempSolarYear.value = solarYear.value
-    tempSolarMonth.value = solarMonth.value
-    tempSolarDay.value = solarDay.value
-    tempSolarHour.value = solarHour.value
-    tempSolarMinute.value = solarMinute.value
+    tempSolarYear.value = baziStore.solarDate.year || solarYear.value;
+    tempSolarMonth.value = baziStore.solarDate.month || solarMonth.value;
+    tempSolarDay.value = baziStore.solarDate.day || solarDay.value;
+    tempSolarHour.value = baziStore.solarDate.hour || solarHour.value;
+    tempSolarMinute.value = baziStore.solarDate.minute || solarMinute.value;
   } else if (inputType.value === 'lunar') {
-    tempLunarYear.value = lunarYear.value
-    tempLunarMonth.value = lunarMonth.value
-    tempLunarDay.value = lunarDay.value
-    tempLunarHour.value = lunarHour.value
-    tempLunarMinute.value = lunarMinute.value
+    tempLunarYear.value = baziStore.lunarDate.year || lunarYear.value;
+    tempLunarMonth.value = baziStore.lunarDate.month || lunarMonth.value;
+    tempLunarDay.value = baziStore.lunarDate.day || lunarDay.value;
+    tempLunarHour.value = baziStore.lunarDate.hour || lunarHour.value;
+    tempLunarMinute.value = baziStore.lunarDate.minute || lunarMinute.value;
   } else if (inputType.value === 'bazi') {
-    tempBaziYear.value = baziYear.value || ganzhiList[0]
-    tempBaziMonth.value = baziMonth.value || ganzhiList[0]
-    tempBaziDay.value = baziDay.value || ganzhiList[0]
-    tempBaziHour.value = baziHour.value || ganzhiList[0]
+    tempBaziYear.value = baziStore.baziData.yearGanZhi || ganzhiList[0];
+    tempBaziMonth.value = baziStore.baziData.monthGanZhi || ganzhiList[0];
+    tempBaziDay.value = baziStore.baziData.dayGanZhi || ganzhiList[0];
+    tempBaziHour.value = baziStore.baziData.hourGanZhi || ganzhiList[0];
   }
-  showDatePicker.value = true
 }
 
 const onConfirm = () => {
   if (inputType.value === 'solar') {
-    solarYear.value = tempSolarYear.value
-    solarMonth.value = tempSolarMonth.value
-    solarDay.value = tempSolarDay.value
-    solarHour.value = tempSolarHour.value
-    solarMinute.value = tempSolarMinute.value
-    solarDisplay.value = `${solarYear.value}年${solarMonth.value}月${solarDay.value}日 ${solarHour.value}:${solarMinute.value}`
+    baziStore.setSolarDate({
+      year: tempSolarYear.value,
+      month: tempSolarMonth.value,
+      day: tempSolarDay.value,
+      hour: tempSolarHour.value,
+      minute: tempSolarMinute.value,
+      display: `${tempSolarYear.value}年${tempSolarMonth.value}月${tempSolarDay.value}日 ${tempSolarHour.value}:${tempSolarMinute.value}`
+    });
   } else if (inputType.value === 'lunar') {
-    lunarYear.value = tempLunarYear.value
-    lunarMonth.value = tempLunarMonth.value
-    lunarDay.value = tempLunarDay.value
-    lunarHour.value = tempLunarHour.value
-    lunarMinute.value = tempLunarMinute.value
-    lunarDisplay.value = `${lunarYear.value}年${lunarMonth.value}月${lunarDay.value}日 ${lunarHour.value}:${lunarMinute.value}`
+    baziStore.setLunarDate({
+      year: tempLunarYear.value,
+      month: tempLunarMonth.value,
+      day: tempLunarDay.value,
+      hour: tempLunarHour.value,
+      minute: tempLunarMinute.value,
+      display: `${tempLunarYear.value}年${tempLunarMonth.value}月${tempLunarDay.value}日 ${tempLunarHour.value}:${tempLunarMinute.value}`
+    });
   } else if (inputType.value === 'bazi') {
-    baziYear.value = tempBaziYear.value
-    baziMonth.value = tempBaziMonth.value
-    baziDay.value = tempBaziDay.value
-    baziHour.value = tempBaziHour.value
+    baziStore.setBaziData({
+      yearGanZhi: tempBaziYear.value,
+      monthGanZhi: tempBaziMonth.value,
+      dayGanZhi: tempBaziDay.value,
+      hourGanZhi: tempBaziHour.value,
+    });
   }
-  showDatePicker.value = false
-}
+  showDatePicker.value = false;
+};
 
 const onCancel = () => {
   showDatePicker.value = false
@@ -432,22 +448,23 @@ const onAnalyze = () => {
 
 const analyzeDisabled = computed(() => {
   if (inputType.value === 'ai') {
-    return !aiText.value.trim()
+    return !baziStore.aiText.trim()
   }
   if (inputType.value === 'solar') {
-    return !solarDisplay.value
+    return !baziStore.solarDisplay
   }
   if (inputType.value === 'lunar') {
-    return !lunarDisplay.value
+    return !baziStore.lunarDisplay
   }
   if (inputType.value === 'bazi') {
-    return !(baziYear.value && baziMonth.value && baziDay.value && baziHour.value)
+    const { yearGanZhi, monthGanZhi, dayGanZhi, hourGanZhi } = baziStore.baziData;
+    return !(yearGanZhi && monthGanZhi && dayGanZhi && hourGanZhi)
   }
   return true
 })
 
 const toggleGender = () => {
-  gender.value = gender.value === '男' ? '女' : '男'
+  baziStore.setGender(baziStore.gender === '男' ? '女' : '男');
 }
 
 const getParticleStyle = (index) => {
