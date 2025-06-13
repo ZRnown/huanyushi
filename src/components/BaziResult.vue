@@ -21,13 +21,6 @@
             </div>
             <div 
               class="sidebar-item" 
-              :class="{ active: activeTab === 'fortune' }"
-              @click="activeTab = 'fortune'"
-            >
-              大运流年
-            </div>
-            <div 
-              class="sidebar-item" 
               :class="{ active: activeTab === 'deep' }"
               @click="activeTab = 'deep'"
             >
@@ -39,7 +32,6 @@
           <div class="content-area">
             <BasicInfo v-if="activeTab === 'basic'" :baziData="baziData" />
             <PersonalityReport v-if="activeTab === 'personality'" :baziData="baziData" />
-            <FortuneReport v-if="activeTab === 'fortune'" :baziData="baziData" />
             <DeepReport v-if="activeTab === 'deep'" :baziData="baziData" />
   
             <!-- 操作按钮 -->
@@ -71,11 +63,10 @@
   import { useRouter, useRoute } from 'vue-router'
   import BasicInfo from './BaziResult/BasicInfo.vue'
   import PersonalityReport from './BaziResult/PersonalityReport.vue'
-  import FortuneReport from './BaziResult/FortuneReport.vue'
   import DeepReport from './BaziResult/DeepReport.vue'
   import AIChat from './BaziResult/AIChat.vue'
   import { useBaziStore } from '../stores/bazi'
-  import { Solar, Lunar } from 'lunar-javascript'
+  import { Solar, Lunar, EightChar } from 'lunar-javascript'
   
   const router = useRouter()
   const route = useRoute()
@@ -87,15 +78,35 @@
   const chatMessagesRef = ref(null)
   const activeTab = ref('basic')
   
+  // 五行中文到英文的映射
+  const elementMap = {
+    '金': 'metal',
+    '木': 'wood',
+    '水': 'water',
+    '火': 'fire',
+    '土': 'earth',
+  };
+  const tianElementMap = {
+    '甲':'wood',
+    '乙':'wood',
+    '丙':'fire',
+    '丁':'fire',
+    '戊':'earth',
+    '己':'earth',
+    '庚':'metal',
+    '辛':'metal',
+    '壬':'water',
+    '癸':'water'
+  }
   // 根据 baziStore 中的数据计算 baziData
   const baziData = computed(() => {
     const input = baziStore.getBaziInputData;
   
     let solarDisplay = '';
     let lunarDisplay = '';
+    let lunarInfo,eightChar;
     const genderText = input.gender === '男' ? '乾造 (男)' : '坤造 (女)';
     const genderClass = input.gender === '男' ? 'male' : 'female';
-  
     if (input.inputType === 'solar' && input.solarDate.year !== null) {
       // 从公历日期创建 Solar 对象
       const solar = Solar.fromYmdHms(
@@ -106,19 +117,20 @@
         parseInt(input.solarDate.minute),
         0 // 秒，默认为 0
       );
-      solarDisplay = solar.toFullString();
-      lunarDisplay = solar.getLunar().toString();
+      lunarInfo = solar.getLunar();
+      solarDisplay = solar.toYmdHms();
+      lunarDisplay = lunarInfo.toString() + " " + lunarInfo.getTimeZhi() + "时";
+      eightChar = EightChar.fromLunar(lunarInfo, input.gender === '男' ? 1 : 0);
+      console.log(eightChar.getTimeShenSha());
     } else if (input.inputType === 'lunar' && input.lunarDate.year !== null) {
       // 从农历日期创建 Lunar 对象
-      let lunar = Lunar.fromYmd(
+      let lunarInfo = Lunar.fromYmd(
         input.lunarDate.year,
         input.lunarDate.month,
         input.lunarDate.day,
         false // 假设不是闰月，如果需要支持闰月，需要 baziStore 提供 isLeapMonth 字段
       );
-      
-      let tempSolar = lunar.getSolar(); // 获取对应的阳历日期 (不含时分)
-  
+      let tempSolar = lunarInfo.getSolar(); // 获取对应的阳历日期 (不含时分)
       // 如果有农历的时分信息，则创建带有时间信息的 Solar 对象，再获取对应的 Lunar 对象
       if (input.lunarDate.hour !== null && input.lunarDate.minute !== null) {
         tempSolar = Solar.fromYmdHms(
@@ -129,17 +141,22 @@
           parseInt(input.lunarDate.minute),
           0
         );
-        lunar = tempSolar.getLunar(); // 获取带有时间信息的农历对象
+        lunarInfo = tempSolar.getLunar(); // 获取带有时间信息的农历对象
       }
-      solarDisplay = tempSolar.toFullString();
-      lunarDisplay = lunar.toString();
+      solarDisplay = tempSolar.toYmdHms();
+      lunarDisplay = lunarInfo.toString() + " " + lunarInfo.getTimeZhi() + "时";
+      eightChar = EightChar.fromLunar(lunarInfo, input.gender === '男' ? 1 : 0);
     } else if (input.inputType === 'bazi') {
       const { yearGanZhi, monthGanZhi, dayGanZhi, hourGanZhi } = input.baziData;
       solarDisplay = `四柱八字: ${yearGanZhi} ${monthGanZhi} ${dayGanZhi} ${hourGanZhi}`;
       lunarDisplay = `四柱八字: ${yearGanZhi} ${monthGanZhi} ${dayGanZhi} ${hourGanZhi}`;
+      eightChar = EightChar.fromGanZhi(yearGanZhi, monthGanZhi, dayGanZhi, hourGanZhi);
     } else if (input.inputType === 'ai') {
       solarDisplay = `AI识别文本: ${input.aiText || '未输入'}`;
       lunarDisplay = `AI识别文本: ${input.aiText || '未输入'}`;
+      // AI模式下没有直接的八字数据，可以提供一个默认或空的EightChar对象
+      // 或者根据AI文本尝试解析，这里暂时提供一个占位
+      eightChar = EightChar.fromLunar(Lunar.fromDate(new Date())); // 默认值
     }
   
     // 占位数据：由于排盘逻辑暂未实现，这里提供空或默认结构
@@ -149,22 +166,109 @@
       solarDate: solarDisplay,
       gender: genderText,
       genderClass: genderClass,
-      userName: input.userName,
+      userName: input.userName || '无名氏',
       address: input.address,
       pillars: [
-        { tiangan: { char: '', element: '', relation: '' }, dizhi: { char: '', element: '' }, canggan: [], nayin: '', xinyun: '', zizuo: '', kongwang: '', shensha: [] },
-        { tiangan: { char: '', element: '', relation: '' }, dizhi: { char: '', element: '' }, canggan: [], nayin: '', xinyun: '', zizuo: '', kongwang: '', shensha: [] },
-        { tiangan: { char: '', element: '', relation: '' }, dizhi: { char: '', element: '' }, canggan: [], nayin: '', xinyun: '', zizuo: '', kongwang: '', shensha: [] },
-        { tiangan: { char: '', element: '', relation: '' }, dizhi: { char: '', element: '' }, canggan: [], nayin: '', xinyun: '', zizuo: '', kongwang: '', shensha: [] }
+        { 
+          tiangan: { 
+            char: eightChar.getYearGan(), 
+            element: elementMap[eightChar.getYearWuXing()[0]],
+            relation: eightChar.getYearShiShenGan()
+          }, 
+          dizhi: { 
+            char: eightChar.getYearZhi(), 
+            element: elementMap[eightChar.getYearWuXing()[1]],
+          }, 
+          canggan: eightChar.getYearHideGan().map((gan,index) => ({
+            char: gan,
+            element: tianElementMap[gan],
+            relation: eightChar.getYearShiShenZhi()[index]
+          })),
+          nayin: eightChar.getYearNaYin(), 
+          xinyun: eightChar.getYearDiShi(), 
+          zizuo: eightChar.getYearZuo(), 
+          kongwang: eightChar.getYearXunKong(), 
+          shensha: [] 
+        },
+        { 
+          tiangan: { 
+            char: eightChar.getMonthGan(), 
+            element: elementMap[eightChar.getMonthWuXing()[0]],
+            relation: eightChar.getMonthShiShenGan()
+          }, 
+          dizhi: { 
+            char: eightChar.getMonthZhi(), 
+            element: elementMap[eightChar.getMonthWuXing()[1]],
+          }, 
+          canggan: eightChar.getMonthHideGan().map((gan,index) => ({
+            char: gan,
+            element: tianElementMap[gan],
+            relation: eightChar.getMonthShiShenZhi()[index]
+          })),
+          nayin: eightChar.getMonthNaYin(), 
+          xinyun: eightChar.getMonthDiShi(), 
+          zizuo: eightChar.getMonthZuo(), 
+          kongwang: eightChar.getMonthXunKong(), 
+          shensha: [] 
+        },
+        { 
+          tiangan: { 
+            char: eightChar.getDayGan(), 
+            element: elementMap[eightChar.getDayWuXing()[0]],
+            relation: eightChar.getDayShiShenGan()
+          }, 
+          dizhi: { 
+            char: eightChar.getDayZhi(), 
+            element: elementMap[eightChar.getDayWuXing()[1]],
+          }, 
+          canggan: eightChar.getDayHideGan().map((gan,index) => ({
+            char: gan,
+            element: tianElementMap[gan],
+            relation: eightChar.getDayShiShenZhi()[index]
+          })),
+          nayin: eightChar.getDayNaYin(), 
+          xinyun: eightChar.getDayDiShi(), 
+          zizuo: eightChar.getDayZuo(), 
+          kongwang: eightChar.getDayXunKong(), 
+          shensha: [] 
+        },
+        { 
+          tiangan: { 
+            char: eightChar.getTimeGan(), 
+            element: elementMap[eightChar.getTimeWuXing()[0]],
+            relation: eightChar.getTimeShiShenGan()
+          }, 
+          dizhi: { 
+            char: eightChar.getTimeZhi(), 
+            element: elementMap[eightChar.getTimeWuXing()[1]],
+          }, 
+          canggan: eightChar.getTimeHideGan().map((gan,index) => ({
+            char: gan,
+            element: tianElementMap[gan],
+            relation: eightChar.getTimeShiShenZhi()[index]
+          })),
+          nayin: eightChar.getTimeNaYin(), 
+          xinyun: eightChar.getTimeDiShi(), 
+          zizuo: eightChar.getTimeZuo(), 
+          kongwang: eightChar.getTimeXunKong(), 
+          shensha: [] 
+        }
       ],
       wuxingStats: { 金: { count: 0, percentage: 0 }, 木: { count: 0, percentage: 0 }, 火: { count: 0, percentage: 0 }, 土: { count: 0, percentage: 0 }, 水: { count: 0, percentage: 0 } },
-      rizhu: { char: '日主', element: '' },
+      rizhu: {
+        char: eightChar.getDayGan(), // 日主天干
+        element: elementMap[eightChar.getDayWuXing()[0]], // 日主五行
+      },
       strength: { type: '', desc: '' },
       favoriteGod: [],
       yinYangAnalysis: { yin: 0, yang: 0, yinPercentage: 0, yangPercentage: 0, description: '' },
       wuxingAnalysis: '',
       shishenAnalysis: { description: '' },
-      shengxiao: { name: '', icon: '', traits: [] },
+      shengxiao: {
+        name: lunarInfo ? lunarInfo.getYearShengXiao() : '',
+        icon: '', // TODO: 可以根据生肖添加图标
+        traits: []
+      },
       geju: { name: '', quality: '', description: '' },
       dayun: [],
       liunian: [],

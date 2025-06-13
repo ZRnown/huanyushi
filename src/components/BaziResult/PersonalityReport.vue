@@ -1,7 +1,50 @@
 <template>
   <div class="tab-content">
-    <!-- 原BaziResult.vue personality tab内容粘贴到这里 -->
-    <!-- ... -->
+    <!-- 阴阳分析 -->
+    <div class="analysis-section">
+      <h3 class="section-title">阴阳分析</h3>
+      <p class="analysis-text">{{ baziData.yinYangAnalysis.description }}</p>
+    </div>
+
+    <!-- 五行分析 -->
+    <div class="analysis-section">
+      <h3 class="section-title">五行分析</h3>
+      <p class="analysis-text">{{ baziData.wuxingAnalysis }}</p>
+    </div>
+
+    <!-- 十神分析 -->
+    <div class="analysis-section">
+      <h3 class="section-title">十神分析</h3>
+      <p class="analysis-text">{{ baziData.shishenAnalysis.description }}</p>
+    </div>
+
+    <!-- 生肖信息 -->
+    <div class="analysis-section shengxiao-section">
+      <h3 class="section-title">生肖信息</h3>
+      <div class="shengxiao-header">
+          <span class="shengxiao-char">{{ baziData.shengxiao.icon }}</span>
+          <span class="shengxiao-name">{{ baziData.shengxiao.name }}</span>
+          <!-- 如果需要显示"己土之虎"这样的组合，需要baziData提供或计算 -->
+          <span class="shengxiao-element">({{ baziData.rizhu.char }}{{ baziData.rizhu.element }}之{{ baziData.shengxiao.name }})</span>
+      </div>
+      <ul class="shengxiao-traits">
+          <li v-for="(trait, index) in baziData.shengxiao.traits" :key="index" class="trait-item">
+              <span class="trait-title">[{{ trait.title }}]</span>
+              <span class="trait-description">{{ trait.description }}</span>
+          </li>
+      </ul>
+    </div>
+
+    <!-- 格局分析 -->
+    <div class="analysis-section geju-section">
+        <h3 class="section-title">格局分析</h3>
+        <div class="geju-header">
+            <span class="geju-name">{{ baziData.geju.name }}</span>
+            <span class="geju-quality">{{ baziData.geju.quality }}</span>
+        </div>
+        <p class="analysis-text">{{ baziData.geju.description }}</p>
+    </div>
+
   </div>
 </template>
 <script setup>
