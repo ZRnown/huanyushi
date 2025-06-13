@@ -121,7 +121,6 @@
       solarDisplay = solar.toYmdHms();
       lunarDisplay = lunarInfo.toString() + " " + lunarInfo.getTimeZhi() + "时";
       eightChar = EightChar.fromLunar(lunarInfo, input.gender === '男' ? 1 : 0);
-      console.log(eightChar.getTimeShenSha());
     } else if (input.inputType === 'lunar' && input.lunarDate.year !== null) {
       // 从农历日期创建 Lunar 对象
       let lunarInfo = Lunar.fromYmd(
@@ -188,7 +187,7 @@
           xinyun: eightChar.getYearDiShi(), 
           zizuo: eightChar.getYearZuo(), 
           kongwang: eightChar.getYearXunKong(), 
-          shensha: [] 
+          shensha: eightChar.getYearShenSha()
         },
         { 
           tiangan: { 
@@ -209,7 +208,7 @@
           xinyun: eightChar.getMonthDiShi(), 
           zizuo: eightChar.getMonthZuo(), 
           kongwang: eightChar.getMonthXunKong(), 
-          shensha: [] 
+          shensha: eightChar.getMonthShenSha()
         },
         { 
           tiangan: { 
@@ -230,7 +229,7 @@
           xinyun: eightChar.getDayDiShi(), 
           zizuo: eightChar.getDayZuo(), 
           kongwang: eightChar.getDayXunKong(), 
-          shensha: [] 
+          shensha: eightChar.getDayShenSha()
         },
         { 
           tiangan: { 
@@ -251,7 +250,7 @@
           xinyun: eightChar.getTimeDiShi(), 
           zizuo: eightChar.getTimeZuo(), 
           kongwang: eightChar.getTimeXunKong(), 
-          shensha: [] 
+          shensha: eightChar.getTimeShenSha()
         }
       ],
       wuxingStats: { 金: { count: 0, percentage: 0 }, 木: { count: 0, percentage: 0 }, 火: { count: 0, percentage: 0 }, 土: { count: 0, percentage: 0 }, 水: { count: 0, percentage: 0 } },

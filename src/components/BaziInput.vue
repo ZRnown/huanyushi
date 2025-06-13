@@ -1,5 +1,5 @@
 <template>
-  <div class="bazi-container">
+  <div class="baziinput-container">
     <div class="bazi-panel">
       <h2 class="bazi-title">八字分析</h2>
       
@@ -481,7 +481,7 @@ const getParticleStyle = (index) => {
 </script>
 
 <style scoped>
-.bazi-container {
+.baziinput-container {
   min-height: 100vh;
   width: 100%;
   display: flex;

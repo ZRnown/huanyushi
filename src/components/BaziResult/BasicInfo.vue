@@ -1,61 +1,76 @@
 <template>
-  <div class="tab-content">
-    <div class="chart-header">
-      <h2 class="chart-title">{{ baziData.userName }}</h2>
-      <div class="birth-info">
-        <div class="info-item">
-          <span class="info-label">阴历：</span>
-          <span class="info-value">{{ baziData.lunarDate }}</span>
+  <div class="bazi-container">
+    <!-- Header Section with Name and Birth Info -->
+    <div class="bazi-header">
+      <h1 class="bazi-name">{{ baziData.userName }}</h1>
+      <div class="bazi-divider">
+        <div class="divider-ornament"></div>
+      </div>
+      <div class="birth-details">
+        <div class="birth-detail">
+          <span class="detail-label">阴历</span>
+          <span class="detail-value">{{ baziData.lunarDate }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">阳历：</span>
-          <span class="info-value">{{ baziData.solarDate }}</span>
+        <div class="birth-detail">
+          <span class="detail-label">阳历</span>
+          <span class="detail-value">{{ baziData.solarDate }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">性别：</span>
-          <span class="info-value gender" :class="baziData.genderClass">
+        <div class="birth-detail">
+          <span class="detail-label">性别</span>
+          <span class="detail-value gender" :class="baziData.genderClass">
             {{ baziData.gender }}
           </span>
         </div>
       </div>
     </div>
-    <!-- 主要八字表格 -->
-    <div class="bazi-table">
-      <div class="table-header">
-        <div class="header-cell"></div>
+
+    <!-- Main BaZi Chart -->
+    <div class="bazi-chart">
+      <div class="chart-header">
+        <div class="header-cell">日期</div>
         <div class="header-cell">年柱</div>
         <div class="header-cell">月柱</div>
         <div class="header-cell">日柱</div>
         <div class="header-cell">时柱</div>
       </div>
-      <!-- 新增主星行 -->
-      <div class="table-row">
-        <div class="row-label">主星</div>
+      
+      <!-- 主星行 -->
+      <div class="chart-row">
+        <div class="row-label">
+          <span>主星</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`zhuxing-${index}`">
-            <span class="tiangan-relation">{{ pillar.tiangan.relation }}</span>
+          <span class="tiangan-relation">{{ pillar.tiangan.relation }}</span>
         </div>
       </div>
-      <div class="table-row">
-        <div class="row-label">天干</div>
+      
+      <!-- 天干行 -->
+      <div class="chart-row">
+        <div class="row-label">
+          <span>天干</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`tiangan-${index}`">
-          <div class="tiangan-content">
-            <span class="tiangan" :class="pillar.tiangan.element">{{ pillar.tiangan.char }}</span>
-          </div>
+          <span class="tiangan" :class="pillar.tiangan.element">{{ pillar.tiangan.char }}</span>
         </div>
       </div>
-      <div class="table-row">
-        <div class="row-label">地支</div>
+      
+      <!-- 地支行 -->
+      <div class="chart-row">
+        <div class="row-label">
+          <span>地支</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`dizhi-${index}`">
-          <div class="dizhi-content">
-            <span class="dizhi" :class="pillar.dizhi.element">{{ pillar.dizhi.char }}</span>
-          </div>
+          <span class="dizhi" :class="pillar.dizhi.element">{{ pillar.dizhi.char }}</span>
         </div>
       </div>
-      <!-- 新增藏干行 -->
-      <div class="table-row">
-        <div class="row-label">藏干</div>
+      
+      <!-- 藏干行 -->
+      <div class="chart-row">
+        <div class="row-label">
+          <span>藏干</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`canggan-row-${index}`">
-          <div class="dizhi-canggan">
+          <div class="canggan-container">
             <div v-for="(canggan, cgIndex) in pillar.canggan" :key="`canggan-row-item-${cgIndex}`" class="canggan-item">
               <span class="canggan-char" :class="canggan.element">{{ canggan.char }}</span>
               <span class="canggan-relation">{{ canggan.relation }}</span>
@@ -63,32 +78,52 @@
           </div>
         </div>
       </div>
-      <div class="table-row">
-        <div class="row-label">星运</div>
+      
+      <!-- 星运行 -->
+      <div class="chart-row">
+        <div class="row-label">
+          <span>星运</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`xinyun-${index}`">
           <span class="xinyun">{{ pillar.xinyun }}</span>
         </div>
       </div>
-      <div class="table-row">
-        <div class="row-label">自坐</div>
+      
+      <!-- 自坐行 -->
+      <div class="chart-row">
+        <div class="row-label">
+          <span>自坐</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`zizuo-${index}`">
           <span class="zizuo">{{ pillar.zizuo }}</span>
         </div>
       </div>
-      <div class="table-row">
-        <div class="row-label">空亡</div>
+      
+      <!-- 空亡行 -->
+      <div class="chart-row">
+        <div class="row-label">
+          <span>空亡</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`kongwang-${index}`">
           <span class="kongwang">{{ pillar.kongwang }}</span>
         </div>
       </div>
-      <div class="table-row">
-        <div class="row-label">纳音</div>
+      
+      <!-- 纳音行 -->
+      <div class="chart-row">
+        <div class="row-label">
+          <span>纳音</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`nayin-${index}`">
           <span class="nayin">{{ pillar.nayin }}</span>
         </div>
       </div>
-      <div class="table-row shensha-row">
-        <div class="row-label">神煞</div>
+      
+      <!-- 神煞行 -->
+      <div class="chart-row shensha-row">
+        <div class="row-label">
+          <span>神煞</span>
+        </div>
         <div class="pillar-cell" v-for="(pillar, index) in baziData.pillars" :key="`shensha-${index}`">
           <div class="shensha-list">
             <div v-for="(shensha, sIndex) in pillar.shensha" :key="`shensha-item-${sIndex}`" class="shensha-item">
@@ -98,45 +133,75 @@
         </div>
       </div>
     </div>
+
     <!-- 大运流年信息区块 -->
-    <div class="fortune-pan-simple">
-      <!-- 头部信息 -->
-      <div class="fortune-info-row">
-        <div class="fortune-info-item">起运：出生后{{ dayunInfo.startYear }}年{{ dayunInfo.startMonth }}月{{ dayunInfo.startDay }}天{{ dayunInfo.startHour || '' }}时起运</div>
-        <div class="fortune-info-item">交运：{{ dayunInfo.jiaoyun }}</div>
-        <div class="fortune-info-item">{{ dayunInfo.kongwang }}</div>
-        <div class="fortune-info-item">{{ dayunInfo.firstAge }}岁</div>
-        <div class="fortune-info-item">司令:{{ dayunInfo.siling }}</div>
+    <div class="fortune-section">
+      <div class="fortune-header">
+        <div class="fortune-title">大运流年</div>
+        <div class="fortune-divider"></div>
       </div>
-      <!-- 大运 -->
-      <div class="fortune-yun-items fortune-yun-row fortune-scroll-x">
-        <div
-          v-for="(yun, idx) in dayunList"
-          :key="yun.startYear"
-          class="fortune-yun-item"
-          :class="{ 'fortune-yun-item-selected': idx === selectedDayunIndex }"
-          @click="selectDayun(idx)"
-        >
-          <div class="fortune-yun-main">{{ yun.gan }}{{ yun.zhi }}</div>
-          <div class="fortune-yun-sub">{{ yun.startYear }}年/{{ yun.startAge }}岁</div>
+      
+      <!-- 头部信息 -->
+      <div class="fortune-info">
+        <div class="fortune-info-item">
+          <span class="info-icon">起</span>
+          <span>出生后{{ dayunInfo.startYear }}年{{ dayunInfo.startMonth }}月{{ dayunInfo.startDay }}天{{ dayunInfo.startHour || '' }}时起运</span>
+        </div>
+        <div class="fortune-info-item">
+          <span class="info-icon">交</span>
+          <span>{{ dayunInfo.jiaoyun }}</span>
+        </div>
+        <div class="fortune-info-item">
+          <span class="info-icon">空</span>
+          <span>{{ dayunInfo.kongwang }}</span>
+        </div>
+        <div class="fortune-info-item">
+          <span class="info-icon">岁</span>
+          <span>{{ liunianList[selectedLiunianIndex] && liunianList[selectedLiunianIndex].age ? liunianList[selectedLiunianIndex].age : 1 }}岁</span>
+        </div>
+        <div class="fortune-info-item">
+          <span class="info-icon">令</span>
+          <span>司令:{{ dayunInfo.siling }}</span>
         </div>
       </div>
+      
+      <!-- 大运 -->
+      <div class="fortune-scroll-container">
+        <div class="fortune-scroll-label">大运</div>
+        <div class="fortune-scroll">
+          <div
+            v-for="(yun, idx) in dayunList"
+            :key="yun.startYear"
+            class="fortune-item dayun-item"
+            :class="{ 'fortune-item-selected': idx === selectedDayunIndex }"
+            @click="selectDayun(idx)"
+          >
+            <div class="fortune-item-main">{{ yun.gan }}{{ yun.zhi }}</div>
+            <div class="fortune-item-sub">{{ yun.startYear }}年/{{ yun.startAge }}岁</div>
+          </div>
+        </div>
+      </div>
+      
       <!-- 流年 -->
-      <div class="fortune-yun-items fortune-yun-row fortune-liunian-row fortune-scroll-x">
-        <div
-          v-for="(nian, idx) in liunianList"
-          :key="nian.year"
-          class="fortune-yun-item fortune-liunian-item"
-          :class="{ 'fortune-yun-item-selected': idx === selectedLiunianIndex }"
-          @click="selectLiunian(idx)"
-        >
-          <div class="fortune-yun-main">{{ nian.gan }}{{ nian.zhi }}</div>
-          <div class="fortune-yun-sub">{{ nian.year }}</div>
+      <div class="fortune-scroll-container">
+        <div class="fortune-scroll-label">流年</div>
+        <div class="fortune-scroll">
+          <div
+            v-for="(nian, idx) in liunianList"
+            :key="nian.year"
+            class="fortune-item liunian-item"
+            :class="{ 'fortune-item-selected': idx === selectedLiunianIndex }"
+            @click="selectLiunian(idx)"
+          >
+            <div class="fortune-item-main">{{ nian.gan }}{{ nian.zhi }}</div>
+            <div class="fortune-item-sub">{{ nian.year }}</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <script setup>
 import { defineProps } from 'vue'
 import { ref, computed } from 'vue'
@@ -209,7 +274,8 @@ function calcDayun() {
       gan: ganZhi.substr(0, 1),
       zhi: ganZhi.substr(1, 1),
       ganShiShen: '',
-      zhiShiShen: ''
+      zhiShiShen: '',
+      age: liuNian.getAge()
     }
   })
 }
@@ -227,323 +293,425 @@ calcDayun()
 </script>
 
 <style>
-/* 复制自BaziResult.vue的相关样式 */
-.tab-content {
-  animation: fadeIn 0.3s ease;
+/* 古风大气配色与布局 */
+.bazi-container {
+  font-family: "SimSun", "宋体", serif;
+  color: #3a2921;
+  padding: 2rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(139, 101, 67, 0.1);
+  max-width: 1000px;
+  margin: 0 auto;
+  animation: fadeIn 0.5s ease;
+  background-image: 
+    linear-gradient(rgba(249, 243, 233, 0.9), rgba(249, 243, 233, 0.9)),
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 50 L60 40 L50 30 L40 40 Z' fill='none' stroke='%23d9c7b3' stroke-width='0.5'/%3E%3C/svg%3E");
 }
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.chart-header {
+
+/* 头部样式 */
+.bazi-header {
   text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e9c46a;
+  margin-bottom: 2.5rem;
 }
-.chart-title {
-  font-size: 2rem;
-  color: #314a43;
+
+.bazi-name {
+  font-size: 2.5rem;
+  color: #8b6543;
   font-weight: bold;
-  letter-spacing: 0.1em;
-  margin-bottom: 1rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5rem;
+  text-shadow: 1px 1px 2px rgba(139, 101, 67, 0.2);
 }
-.birth-info {
+
+.bazi-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem auto;
+  width: 80%;
+  max-width: 400px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a77c, transparent);
+  position: relative;
+}
+
+.divider-ornament {
+  position: absolute;
+  width: 40px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='20' viewBox='0 0 40 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0 L30 10 L20 20 L10 10 Z' fill='none' stroke='%23c9a77c' stroke-width='1'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.birth-details {
   display: flex;
   justify-content: center;
-  gap: 2rem;
   flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 1.5rem;
 }
-.info-item {
+
+.birth-detail {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-.info-label {
-  color: #666;
-  font-size: 1rem;
-}
-.info-value {
-  color: #314a43;
-  font-weight: 600;
-  font-size: 1rem;
-}
-.info-value.gender.male {
-  color: #c77f6a;
-}
-.info-value.gender.female {
-  color: #2c3e50;
-}
-.bazi-table {
-  background: #fdfcf6;
-  border: 0.5px solid #e9c46a;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 2rem;
-}
-.table-header {
-  display: grid;
-  grid-template-columns: 120px repeat(4, 1fr);
-  background: #c77f6a;
-  color: #fff;
-}
-.header-cell {
-  padding: 1rem;
-  text-align: center;
+
+.detail-label {
+  color: #8b6543;
+  font-size: 1.1rem;
   font-weight: bold;
+  background: #f0e6d6;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+}
+
+.detail-value {
+  color: #3a2921;
+  font-weight: 600;
   font-size: 1.1rem;
 }
+
+.gender.male {
+  color: #8b4513;
+}
+
+.gender.female {
+  color: #9c4668;
+}
+
+/* 八字表格样式 */
+.bazi-chart {
+  background: #f5efe5;
+  border: 1px solid #d9c7b3;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 2px 10px rgba(139, 101, 67, 0.1);
+}
+
+.chart-header {
+  display: grid;
+  grid-template-columns: 100px repeat(4, 1fr);
+  background: #d4b58c;
+  color: #3a2921;
+}
+
+.header-cell {
+  padding: 1rem 0.5rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  /* border-right: 1px solid rgba(139, 101, 67, 0.2); */
+}
+
 .header-cell:last-child {
   border-right: none;
 }
-.table-row {
+
+
+.chart-row {
   display: grid;
-  grid-template-columns: 120px repeat(4, 1fr);
+  grid-template-columns: 100px repeat(4, 1fr);
+  /* border-bottom: 1px solid #d9c7b3; */
 }
-.bazi-table .table-row:nth-of-type(odd) {
-  background-color: #fbf7ef; /* 奇数行背景色 */
+
+.chart-row:last-child {
+  border-bottom: none;
 }
+
 .row-label {
-  padding: 1rem;
+  padding: 1rem 0.5rem;
   text-align: center;
   font-weight: bold;
-  color: #314a43;
+  color: #8b6543;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 1.1rem;  /* border-right: 1px solid #d9c7b3; */
+}
+.chart-row:nth-child(odd) .row-label {
+  background-color: #f9f5ef;
 }
 .pillar-cell {
-  padding: 1rem;
+  padding: 1rem 0.5rem;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* border-right: 1px solid #d9c7b3; */
+  min-height: 60px;
 }
+
 .pillar-cell:last-child {
   border-right: none;
 }
-.tiangan-content, .dizhi-content {
+
+.chart-row:nth-child(odd) .pillar-cell {
+  background-color: #f9f5ef;
+}
+
+/* 天干地支样式 */
+.tiangan, .dizhi {
+  font-size: 2.2rem;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tiangan-relation {
+  font-size: 1.1rem;
+  color: #8b6543;
+  font-weight: bold;
+}
+
+/* 五行颜色 */
+.wood { color: #08e92f; }
+.fire { color: #d30505; }
+.earth { color: #8b6d03; }
+.metal { color: #ef9106; }
+.water { color: #2e83f6; }
+
+/* 藏干样式 */
+.canggan-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0.3rem;
 }
-.tiangan, .dizhi {
-  font-size: 2rem;
-  font-weight: bold;
-}
-.tiangan-relation, .canggan-relation {
-  font-size: 1rem;
-  color: #314a43;
-  font-weight: bold;
-}
-.wood { color: #53c694; }
-.fire { color: #d30505; }
-.earth { color: #a15c41; }
-.metal { color: #ecc058; }
-.water { color: #2e83f6; }
-.dizhi-canggan {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  margin-top: 0.5rem;
-}
+
 .canggan-item {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.9rem;
+  justify-content: center;
+  gap: 0.4rem;
 }
+
 .canggan-char {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 1.2rem;
 }
-.nayin, .xinyun, .zizuo, .kongwang {
-  font-size: 1rem;
-  color: #314a43;
+
+.canggan-relation {
+  font-size: 0.9rem;
+  color: #8b6543;
+}
+
+/* 其他信息样式 */
+.xinyun, .zizuo, .kongwang, .nayin {
+  font-size: 1.1rem;
+  color: #3a2921;
   font-weight: bold;
 }
+
+/* 神煞样式 */
+.shensha-row .pillar-cell {
+  padding: 0.8rem 0.5rem;
+}
+
 .shensha-list {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.3rem;
 }
+
 .shensha-item {
   font-size: 0.9rem;
-  color: #314a43;
+  color: #8b6543;
   text-align: center;
   font-weight: bold;
+  background: #f0e6d6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
 }
-.analysis-section {
-  background: #fff;
-  border: 1px solid #e9c46a;
-  border-radius: 12px;
+
+/* 大运流年区域样式 */
+.fortune-section {
+  background: #f5efe5;
+  border: 1px solid #d9c7b3;
+  border-radius: 8px;
   padding: 1.5rem;
-  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(139, 101, 67, 0.1);
 }
-.section-title {
-  font-size: 1.5rem;
-  color: #314a43;
+
+.fortune-header {
   margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.fortune-title {
+  font-size: 1.5rem;
+  color: #8b6543;
   font-weight: bold;
   text-align: center;
+  letter-spacing: 0.1em;
 }
-.analysis-text {
-  color: #666;
-  font-size: 1rem;
+
+.fortune-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a77c, transparent);
+  margin: 0.8rem auto;
 }
-.shengxiao-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.shengxiao-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-.shengxiao-char {
-  font-size: 2rem;
-  font-weight: bold;
-}
-.shengxiao-name {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-.shengxiao-element {
-  font-size: 0.9rem;
-  color: #666;
-}
-.shengxiao-traits {
-  list-style: none;
-  padding-left: 0;
-}
-.trait-item {
-  margin-bottom: 0.5rem;
-}
-.trait-title {
-  font-weight: bold;
-}
-.trait-description {
-  margin-left: 1rem;
-}
-.geju-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.geju-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-.geju-name {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-.geju-quality {
-  font-size: 0.9rem;
-  color: #666;
-}
-.shensha-row .row-label {
-  align-items: flex-start;
-  padding-top: 1rem;
-}
-.shensha-row .pillar-cell {
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 1rem;
-}
-.shensha-row .shensha-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-}
-.fortune-pan-simple {
-  margin: 1.5rem 0 0 0;
-  background: #f9f5e8;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px #e9c46a22;
-  padding: 1.2rem 1rem 1.2rem 1rem;
-}
-.fortune-info-row {
+
+.fortune-info {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.2rem 2.2rem;
-  margin-bottom: 0.7rem;
-  font-size: 1rem;
-  color: #b03a2e;
-  align-items: center;
+  gap: 1rem 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f9f5ef;
+  border-radius: 6px;
+  border: 1px dashed #d9c7b3;
 }
+
 .fortune-info-item {
-  white-space: nowrap;
-}
-.fortune-yun-row {
   display: flex;
-  flex-wrap: nowrap;
+  align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.7rem;
-  overflow-x: auto;
+  color: #3a2921;
+  font-size: 1rem;
 }
-.fortune-scroll-x {
-  overflow-x: auto !important;
-  scrollbar-color: #e9c46a #f9f5e8;
-  scrollbar-width: thin;
+
+.info-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  background: #c9a77c;
+  color: #fff;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.9rem;
 }
-.fortune-scroll-x::-webkit-scrollbar {
-  height: 8px;
-  background: #f9f5e8;
+
+/* 大运流年滚动区域 */
+.fortune-scroll-container {
+  margin-bottom: 1.5rem;
+  position: relative;
 }
-.fortune-scroll-x::-webkit-scrollbar-thumb {
-  background: #e9c46a;
-  border-radius: 6px;
+
+.fortune-scroll-container:last-child {
+  margin-bottom: 0;
 }
-.fortune-scroll-x::-webkit-scrollbar-track {
-  background: #f9f5e8;
-  border-radius: 6px;
-}
-.fortune-yun-item {
-  background: #fff;
-  border: 1.5px solid #e9c46a;
-  border-radius: 8px;
-  padding: 0.5rem 1.1rem;
-  min-width: 70px;
+
+.fortune-scroll-label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #8b6543;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 4px 0 0 4px;
+  font-weight: bold;
+  z-index: 1;
+  width: 2rem;
   text-align: center;
-  box-shadow: 0 1px 4px #e9c46a22;
+  writing-mode: vertical-lr;
+  letter-spacing: 0.1em;
+}
+
+.fortune-scroll {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  width: 100%;
+  padding-left: 3rem;
+}
+
+.fortune-item {
+  background: #fff;
+  border: 1px solid #d9c7b3;
+  padding: 0.5rem;
+  text-align: center;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: box-shadow 0.2s, border-color 0.2s;
-  cursor: pointer;
+  border-radius: 0;
+  margin: 0;
+  border-right: none;
+}
+
+.fortune-item:last-child {
+  border-right: 1px solid #d9c7b3;
+}
+
+.fortune-item-selected {
+  background: #f0e6d6;
+}
+
+.fortune-item-main {
   font-size: 1.1rem;
-}
-.fortune-yun-item-selected {
-  border-color: #c77f6a;
-  box-shadow: 0 2px 8px #c77f6a33;
-  background: #fdf6ec;
-}
-.fortune-yun-main {
-  font-size: 1.15rem;
-  color: #314a43;
+  color: #3a2921;
   font-weight: bold;
-  margin-bottom: 2px;
 }
-.fortune-yun-sub {
-  font-size: 0.92rem;
-  color: #b03a2e;
+
+.fortune-item-sub {
+  font-size: 0.9rem;
+  color: #8b6543;
 }
-.fortune-liunian-row {
-  margin-bottom: 0;
+
+.liunian-item {
+  padding: 0.4rem;
 }
-.fortune-liunian-item {
-  min-width: 60px;
-  padding: 0.4rem 0.7rem;
-  font-size: 1rem;
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .bazi-container {
+    padding: 1.5rem 1rem;
+  }
+  
+  .bazi-name {
+    font-size: 2rem;
+  }
+  
+  .chart-header, .chart-row {
+    grid-template-columns: 80px repeat(4, 1fr);
+  }
+  
+  .header-cell, .row-label, .pillar-cell {
+    padding: 0.8rem 0.3rem;
+  }
+  
+  .tiangan, .dizhi {
+    font-size: 1.8rem;
+  }
+  
+  .fortune-info {
+    padding: 0.8rem;
+    gap: 0.8rem 1.5rem;
+  }
 }
-</style> 
+
+@media (max-width: 480px) {
+  .birth-details {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .chart-header, .chart-row {
+    grid-template-columns: 70px repeat(4, 1fr);
+  }
+  
+  .tiangan, .dizhi {
+    font-size: 1.5rem;
+  }
+  
+  .fortune-scroll-label {
+    width: 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .fortune-scroll {
+    padding-left: 2.5rem;
+  }
+}
+</style>
