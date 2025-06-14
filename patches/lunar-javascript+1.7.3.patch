@@ -3,7 +3,7 @@ new file mode 100644
 index 0000000..a554664
 Binary files /dev/null and b/node_modules/lunar-javascript/.DS_Store differ
 diff --git a/node_modules/lunar-javascript/lunar.js b/node_modules/lunar-javascript/lunar.js
-index d4e7f04..0741c9c 100644
+index d4e7f04..fd9c1ef 100644
 --- a/node_modules/lunar-javascript/lunar.js
 +++ b/node_modules/lunar-javascript/lunar.js
 @@ -1,20 +1,20 @@
@@ -4974,7 +4974,7 @@ index d4e7f04..0741c9c 100644
              s += ' ';
              s += this.getBaMenInQiMen();
              s += '门';
-@@ -5584,135 +5584,507 @@
+@@ -5584,135 +5584,527 @@
        };
      };
      return {
@@ -5006,11 +5006,11 @@ index d4e7f04..0741c9c 100644
 -        _p:{sect:2,lunar:lunar},
 -        setSect:function(sect){
 +        _p: { sect: 2, lunar: lunar, gender: gender, shenShaCache: null },
++        // 获取勾绞煞
 +        _getGouJiaoSha: function () {
 +          var yearZhiIndex = this._p.lunar.getYearZhiIndexExact();
 +          var isYangYear = this._p.lunar.getYearGanIndexExact() % 2 === 0;
 +          var isMale = this._p.gender === 1;
-+
 +          var gouZhiIndex = (yearZhiIndex + 3) % 12;
 +          var jiaoZhiIndex = (yearZhiIndex - 3 + 12) % 12;
 +
@@ -5029,14 +5029,18 @@ index d4e7f04..0741c9c 100644
 +        },
 +
 +        _calculateShenSha: function () {
++          // 如果已有缓存，直接返回
 +          if (this._p.shenShaCache) return this._p.shenShaCache;
 +
++          // 初始化神煞存储对象
 +          var shens = { year: [], month: [], day: [], time: [] };
 +          var pillars = ['year', 'month', 'day', 'time'];
 +
++          // 获取四柱天干地支
 +          var allStems = [this.getYearGan(), this.getMonthGan(), this.getDayGan(), this.getTimeGan()];
 +          var allZhis = [this.getYearZhi(), this.getMonthZhi(), this.getDayZhi(), this.getTimeZhi()];
 +
++          // 常用干支变量
 +          var dayGan = this.getDayGan();
 +          var yearGan = this.getYearGan();
 +          var dayZhi = this.getDayZhi();
@@ -5047,6 +5051,7 @@ index d4e7f04..0741c9c 100644
 +          var timePillar = this.getTime();
 +          var lunarMonth = this._p.lunar.getMonth();
 +
++          // 辅助函数：向指定柱添加神煞
 +          var addShenSha = function (pillarIndex, name) {
 +            if (pillarIndex < 0 || pillarIndex > 3) return;
 +            if (shens[pillars[pillarIndex]]) {
@@ -5054,25 +5059,23 @@ index d4e7f04..0741c9c 100644
 +            }
 +          };
 +
++          // 辅助函数：在四柱地支中查找目标并添加神煞
 +          var findShenShaInZhi = function (targets, name) {
 +            allZhis.forEach(function (z, i) {
 +              if (targets.includes(z)) addShenSha(i, name);
 +            });
 +          };
 +
-+          // 吉神
++          // --- 吉神 ---
++
 +          // 天乙贵人
 +          var tianYiRule = { '甲': ['丑', '未'], '戊': ['丑', '未'], '庚': ['丑', '未'], '乙': ['子', '申'], '己': ['子', '申'], '丙': ['亥', '酉'], '丁': ['亥', '酉'], '壬': ['卯', '巳'], '癸': ['卯', '巳'], '辛': ['寅', '午'] };
-+          var tianYiTargets1 = tianYiRule[dayGan] || [];
-+          var tianYiTargets2 = tianYiRule[yearGan] || [];
-+          var tianYiTargets = tianYiTargets1.concat(tianYiTargets2.filter(function (item) { return tianYiTargets1.indexOf(item) < 0; }));
++          var tianYiTargets = (tianYiRule[dayGan] || []).concat((tianYiRule[yearGan] || []).filter(function (item) { return (tianYiRule[dayGan] || []).indexOf(item) < 0; }));
 +          if (tianYiTargets.length > 0) findShenShaInZhi(tianYiTargets, '天乙贵人');
 +
 +          // 太极贵人
 +          var taiJiRule = { '甲': ['子', '午'], '乙': ['子', '午'], '丙': ['酉', '卯'], '丁': ['酉', '卯'], '戊': ['辰', '戌', '丑', '未'], '己': ['辰', '戌', '丑', '未'], '庚': ['寅', '亥'], '辛': ['寅', '亥'], '壬': ['巳', '申'], '癸': ['巳', '申'] };
-+          var taiJiTargets1 = taiJiRule[dayGan] || [];
-+          var taiJiTargets2 = taiJiRule[yearGan] || [];
-+          var taiJiTargets = taiJiTargets1.concat(taiJiTargets2.filter(function (item) { return taiJiTargets1.indexOf(item) < 0; }));
++          var taiJiTargets = (taiJiRule[dayGan] || []).concat((taiJiRule[yearGan] || []).filter(function (item) { return (taiJiRule[dayGan] || []).indexOf(item) < 0; }));
 +          if (taiJiTargets.length > 0) findShenShaInZhi(taiJiTargets, '太极贵人');
 +
 +          // 天德/月德贵人
@@ -5099,16 +5102,12 @@ index d4e7f04..0741c9c 100644
 +
 +          // 福星贵人
 +          var fuXingRule = { '甲': ['寅', '子'], '丙': ['寅', '子'], '乙': ['卯', '丑'], '癸': ['卯', '丑'], '戊': ['申'], '己': ['未'], '丁': ['亥'], '庚': ['午'], '辛': ['巳'], '壬': ['辰'] };
-+          var fuXingTargets1 = fuXingRule[dayGan] || [];
-+          var fuXingTargets2 = fuXingRule[yearGan] || [];
-+          var fuXingTargets = fuXingTargets1.concat(fuXingTargets2.filter(function (item) { return fuXingTargets1.indexOf(item) < 0; }));
++          var fuXingTargets = (fuXingRule[dayGan] || []).concat((fuXingRule[yearGan] || []).filter(function (item) { return (fuXingRule[dayGan] || []).indexOf(item) < 0; }));
 +          if (fuXingTargets.length > 0) findShenShaInZhi(fuXingTargets, '福星贵人');
 +
 +          // 文昌贵人
 +          var wenChangRule = { '甲': ['巳'], '乙': ['午'], '丙': ['申'], '戊': ['申'], '丁': ['酉'], '己': ['酉'], '庚': ['亥'], '辛': ['子'], '壬': ['寅'], '癸': ['卯'] };
-+          var wenChangTargets1 = wenChangRule[dayGan] || [];
-+          var wenChangTargets2 = wenChangRule[yearGan] || [];
-+          var wenChangTargets = wenChangTargets1.concat(wenChangTargets2.filter(function (item) { return wenChangTargets1.indexOf(item) < 0; }));
++          var wenChangTargets = (wenChangRule[dayGan] || []).concat((wenChangRule[yearGan] || []).filter(function (item) { return (wenChangRule[dayGan] || []).indexOf(item) < 0; }));
 +          if (wenChangTargets.length > 0) findShenShaInZhi(wenChangTargets, '文昌贵人');
 +
 +          // 天厨贵人
@@ -5123,9 +5122,7 @@ index d4e7f04..0741c9c 100644
 +
 +          // 国印贵人
 +          var guoYinRule = { '甲': ['戌'], '乙': ['亥'], '丙': ['丑'], '丁': ['寅'], '戊': ['丑'], '己': ['寅'], '庚': ['辰'], '辛': ['巳'], '壬': ['未'], '癸': ['申'] };
-+          var guoYinTargets1 = guoYinRule[dayGan] || [];
-+          var guoYinTargets2 = guoYinRule[yearGan] || [];
-+          var guoYinTargets = guoYinTargets1.concat(guoYinTargets2.filter(function (item) { return guoYinTargets1.indexOf(item) < 0; }));
++          var guoYinTargets = (guoYinRule[dayGan] || []).concat((guoYinRule[yearGan] || []).filter(function (item) { return (guoYinRule[dayGan] || []).indexOf(item) < 0; }));
 +          if (guoYinTargets.length > 0) findShenShaInZhi(guoYinTargets, '国印贵人');
 +
 +          // 学堂 & 词馆
@@ -5140,7 +5137,7 @@ index d4e7f04..0741c9c 100644
 +            if (ciGuanTargets.includes(z)) addShenSha(i, '词馆');
 +          });
 +
-+          // 德秀贵人
++          // 德秀贵人 (逻辑正确，无需修改)
 +          var deXiuDeRule = [], deXiuXiuRule = [];
 +          if (['寅', '午', '戌'].includes(monthZhi)) { deXiuDeRule = ['丙', '丁']; deXiuXiuRule = ['戊', '癸']; }
 +          else if (['申', '子', '辰'].includes(monthZhi)) { deXiuDeRule = ['壬', '癸', '戊', '己']; deXiuXiuRule = ['丙', '辛', '甲', '己']; }
@@ -5154,7 +5151,7 @@ index d4e7f04..0741c9c 100644
 +            });
 +          }
 +
-+          // 驿马, 华盖, 将星
++          // 驿马, 华盖, 将星 (逻辑正确，无需修改)
 +          var sanHeRules = { '驿马': { '申子辰': '寅', '寅午戌': '申', '巳酉丑': '亥', '亥卯未': '巳' }, '华盖': { '寅午戌': '戌', '亥卯未': '未', '申子辰': '辰', '巳酉丑': '丑' }, '将星': { '寅午戌': '午', '巳酉丑': '酉', '申子辰': '子', '亥卯未': '卯' } };
 +          Object.keys(sanHeRules).forEach(function (shen) {
 +            var rule = sanHeRules[shen];
@@ -5166,9 +5163,7 @@ index d4e7f04..0741c9c 100644
 +
 +          // 金舆
 +          var jinYuRule = { '甲': '辰', '乙': '巳', '丙': '未', '丁': '申', '戊': '未', '己': '申', '庚': '戌', '辛': '亥', '壬': '丑', '癸': '寅' };
-+          var jinYuTargets1 = jinYuRule[dayGan] ? [jinYuRule[dayGan]] : [];
-+          var jinYuTargets2 = jinYuRule[yearGan] ? [jinYuRule[yearGan]] : [];
-+          var jinYuTargets = jinYuTargets1.concat(jinYuTargets2.filter(function (item) { return jinYuTargets1.indexOf(item) < 0; }));
++          var jinYuTargets = (jinYuRule[dayGan] ? [jinYuRule[dayGan]] : []).concat((jinYuRule[yearGan] ? [jinYuRule[yearGan]] : []).filter(function (item) { return (jinYuRule[dayGan] ? [jinYuRule[dayGan]] : []).indexOf(item) < 0; }));
 +          if (jinYuTargets.length > 0) findShenShaInZhi(jinYuTargets, '金舆');
 +
 +          // 金神
@@ -5186,32 +5181,25 @@ index d4e7f04..0741c9c 100644
 +
 +          // 拱禄
 +          var gongLuRule = { '癸亥日癸丑时': '子', '癸丑日癸亥时': '子', '丁巳日丁未时': '午', '己未日己巳时': '午', '戊辰日戊午时': '巳' };
-+          var gongLuKey = dayPillar + '日' + timePillar + '时';
-+          if (gongLuRule[gongLuKey]) { addShenSha(2, '拱禄'); addShenSha(3, '拱禄'); }
++          if (gongLuRule[dayPillar + '日' + timePillar + '时']) { addShenSha(2, '拱禄'); addShenSha(3, '拱禄'); }
 +
 +          // 天赦
-+          var isTianShe = (['寅', '卯', '辰'].includes(monthZhi) && dayPillar === '戊寅') ||
++          if ((['寅', '卯', '辰'].includes(monthZhi) && dayPillar === '戊寅') ||
 +            (['巳', '午', '未'].includes(monthZhi) && dayPillar === '甲午') ||
 +            (['申', '酉', '戌'].includes(monthZhi) && dayPillar === '戊申') ||
-+            (['亥', '子', '丑'].includes(monthZhi) && dayPillar === '甲子');
-+          if (isTianShe) addShenSha(2, '天赦');
++            (['亥', '子', '丑'].includes(monthZhi) && dayPillar === '甲子')) {
++            addShenSha(2, '天赦');
++          }
 +
-+          // 日德
++          // 日德, 日贵, 六秀, 十灵日, 进神
 +          if (['甲寅', '丙辰', '戊辰', '庚辰', '壬戌'].includes(dayPillar)) addShenSha(2, '日德');
-+
-+          // 日贵
 +          if (['丁酉', '丁亥', '癸卯', '癸巳'].includes(dayPillar)) addShenSha(2, '日贵');
-+
-+          // 六秀
 +          if (['丙午', '丁未', '戊子', '戊午', '己丑', '己未'].includes(dayPillar)) addShenSha(2, '六秀');
-+
-+          // 十灵日
 +          if (['甲辰', '乙亥', '丙辰', '丁酉', '戊午', '庚戌', '庚寅', '辛亥', '壬寅', '癸未'].includes(dayPillar)) addShenSha(2, '十灵日');
-+
-+          // 进神
 +          if (['甲子', '甲午', '己卯', '己酉'].includes(dayPillar)) addShenSha(2, '进神');
 +
-+          // 凶煞
++          // --- 凶煞 ---
++
 +          // 天罗地网
 +          var yearNaYinWuXing = this.getYearNaYin().slice(-1);
 +          if (yearNaYinWuXing === '火' && (yearZhi === '戌' || yearZhi === '亥')) addShenSha(0, '天罗');
@@ -5256,22 +5244,19 @@ index d4e7f04..0741c9c 100644
 +
 +          // 阴阳差错, 孤鸾煞, 十恶大败
 +          if (['丙子', '丁丑', '戊寅', '辛卯', '壬辰', '癸巳', '丙午', '丁未', '戊申', '辛酉', '壬戌', '癸亥'].includes(dayPillar)) addShenSha(2, '阴阳差错');
-+          var guLuanDays = ['乙巳', '丁巳', '辛亥', '戊申', '壬寅', '戊午', '壬子', '丙午'];
-+          var guLuanCount = 0;
-+          if (guLuanDays.includes(dayPillar)) guLuanCount++;
-+          if (guLuanDays.includes(timePillar)) guLuanCount++;
-+          if (guLuanCount >= 2) {
-+            if (guLuanDays.includes(dayPillar)) addShenSha(2, '孤鸾煞');
-+            if (guLuanDays.includes(timePillar)) addShenSha(3, '孤鸾煞');
++          if (['乙巳', '丁巳', '辛亥', '戊申', '壬寅', '戊午', '壬子', '丙午'].includes(dayPillar) || ['乙巳', '丁巳', '辛亥', '戊申', '壬寅', '戊午', '壬子', '丙午'].includes(timePillar)) {
++            if (['乙巳', '丁巳', '辛亥', '戊申', '壬寅', '戊午', '壬子', '丙午'].includes(dayPillar)) addShenSha(2, '孤鸾煞');
++            if (['乙巳', '丁巳', '辛亥', '戊申', '壬寅', '戊午', '壬子', '丙午'].includes(timePillar)) addShenSha(3, '孤鸾煞');
 +          }
 +          if (['甲辰', '乙巳', '壬申', '丙申', '丁亥', '庚辰', '戊戌', '癸亥', '辛巳', '己丑'].includes(dayPillar)) addShenSha(2, '十恶大败');
 +
 +          // 四废
-+          var isSiFei = (['寅', '卯', '辰'].includes(monthZhi) && ['庚申', '辛酉'].includes(dayPillar)) ||
++          if ((['寅', '卯', '辰'].includes(monthZhi) && ['庚申', '辛酉'].includes(dayPillar)) ||
 +            (['巳', '午', '未'].includes(monthZhi) && ['壬子', '癸亥'].includes(dayPillar)) ||
 +            (['申', '酉', '戌'].includes(monthZhi) && ['甲寅', '乙卯'].includes(dayPillar)) ||
-+            (['亥', '子', '丑'].includes(monthZhi) && ['丙午', '丁巳'].includes(dayPillar));
-+          if (isSiFei) addShenSha(2, '四废');
++            (['亥', '子', '丑'].includes(monthZhi) && ['丙午', '丁巳'].includes(dayPillar))) {
++            addShenSha(2, '四废');
++          }
 +
 +          // 元辰
 +          var isYangYear = this._p.lunar.getYearGanIndexExact() % 2 === 0;
@@ -5291,19 +5276,27 @@ index d4e7f04..0741c9c 100644
 +            if (kongWangTargets.includes(timeZhi)) addShenSha(3, '空亡');
 +          }
 +
-+          // 咸池桃花/红艳煞
++          // 桃花/红艳煞 (名称已修改)
 +          var taoHuaRule = { '申子辰': '酉', '寅午戌': '卯', '巳酉丑': '午', '亥卯未': '子' };
 +          Object.keys(taoHuaRule).forEach(function (group) {
-+            if (group.includes(yearZhi)) findShenShaInZhi([taoHuaRule[group]], '咸池桃花');
-+            if (group.includes(dayZhi)) findShenShaInZhi([taoHuaRule[group]], '咸池桃花');
++            if (group.includes(yearZhi)) findShenShaInZhi([taoHuaRule[group]], '桃花');
++            if (group.includes(dayZhi)) findShenShaInZhi([taoHuaRule[group]], '桃花');
 +          });
 +          var hongYanRule = { '甲': '午', '乙': '午', '丙': '寅', '丁': '未', '戊': '辰', '己': '辰', '庚': '戌', '辛': '酉', '壬': '子', '癸': '申' };
 +          var hongYanTarget = hongYanRule[dayGan];
 +          if (hongYanTarget) findShenShaInZhi([hongYanTarget], '红艳煞');
 +
-+          // 八专
++          // 红鸾, 天喜
++          var hongLuanRule = { '子': '卯', '丑': '寅', '寅': '丑', '卯': '子', '辰': '亥', '巳': '戌', '午': '酉', '未': '申', '申': '未', '酉': '午', '戌': '巳', '亥': '辰' };
++          var hongLuanTarget = hongLuanRule[yearZhi];
++          if (hongLuanTarget) {
++            var tianXiTarget = LunarUtil.ZHI[(LunarUtil.ZHI.indexOf(hongLuanTarget) + 6) % 12];
++            findShenShaInZhi([hongLuanTarget], '红鸾');
++            findShenShaInZhi([tianXiTarget], '天喜');
++          }
++
++          // 八专, 九丑
 +          if (['甲寅', '乙卯', '己未', '丁未', '庚申', '辛酉', '戊戌', '癸丑'].includes(dayPillar)) addShenSha(2, '八专');
-+          // 九丑
 +          if (['戊子', '戊午', '壬子', '壬午', '乙卯', '辛卯', '己卯', '乙酉', '辛酉', '己酉'].includes(dayPillar)) addShenSha(2, '九丑');
 +
 +          // 血支，血刃，流霞
@@ -5314,22 +5307,49 @@ index d4e7f04..0741c9c 100644
 +          if (xueRenRule[lunarMonth < 0 ? -lunarMonth : lunarMonth]) findShenShaInZhi([xueRenRule[lunarMonth < 0 ? -lunarMonth : lunarMonth]], '血刃');
 +          if (liuXiaRule[dayGan]) findShenShaInZhi([liuXiaRule[dayGan]], '流霞');
 +
-+          // 丧门, 吊客
-+          var sangDiaoZhi = this._p.lunar.getYearZhi();
-+          var sangMenTargetIndex = (LunarUtil.ZHI.indexOf(sangDiaoZhi) + 2) % 12;
-+          var diaoKeTargetIndex = (LunarUtil.ZHI.indexOf(sangDiaoZhi) - 2 + 12) % 12;
-+          var sangMenTarget = LunarUtil.ZHI[sangMenTargetIndex];
-+          var diaoKeTarget = LunarUtil.ZHI[diaoKeTargetIndex];
++          // **[修正]** 丧门, 吊客, 披麻
++          var yearZhiIndex = LunarUtil.ZHI.indexOf(yearZhi);
++          var sangMenTarget = LunarUtil.ZHI[(yearZhiIndex + 2) % 12];
++          var diaoKeTarget = LunarUtil.ZHI[(yearZhiIndex - 2 + 12) % 12];
++          // 披麻根据您提供的对照表进行查找
++          var piMaRule = { '子': '酉', '丑': '戌', '寅': '亥', '卯': '子', '辰': '丑', '巳': '寅', '午': '卯', '未': '辰', '申': '巳', '酉': '午', '戌': '未', '亥': '申' };
++          var piMaTarget = piMaRule[yearZhi];
 +          allZhis.forEach(function (z, i) {
 +            if (z === sangMenTarget) addShenSha(i, '丧门');
 +            if (z === diaoKeTarget) addShenSha(i, '吊客');
++            if (piMaTarget && z === piMaTarget) addShenSha(i, '披麻');
 +          });
 +
-+          // 去重
++          // 童子煞
++          var springAutumn = ['寅', '卯', '辰', '申', '酉', '戌'];
++          var isTongZi = false;
++          if (springAutumn.includes(monthZhi)) {
++            if (['寅', '子'].includes(dayZhi)) { addShenSha(2, '童子煞'); isTongZi = true; }
++            if (['寅', '子'].includes(timeZhi)) { addShenSha(3, '童子煞'); isTongZi = true; }
++          } else { // 冬夏季
++            if (['卯', '未', '辰'].includes(dayZhi)) { addShenSha(2, '童子煞'); isTongZi = true; }
++            if (['卯', '未', '辰'].includes(timeZhi)) { addShenSha(3, '童子煞'); isTongZi = true; }
++          }
++          if (!isTongZi) {
++            var yearNaYinWuXing = this.getYearNaYin().slice(-1);
++            if (['金', '木'].includes(yearNaYinWuXing)) {
++              if (['午', '卯'].includes(dayZhi)) { addShenSha(2, '童子煞'); }
++              if (['午', '卯'].includes(timeZhi)) { addShenSha(3, '童子煞'); }
++            } else if (['水', '火'].includes(yearNaYinWuXing)) {
++              if (['酉', '戌'].includes(dayZhi)) { addShenSha(2, '童子煞'); }
++              if (['酉', '戌'].includes(timeZhi)) { addShenSha(3, '童子煞'); }
++            } else if (yearNaYinWuXing === '土') {
++              if (['辰', '巳'].includes(dayZhi)) { addShenSha(2, '童子煞'); }
++              if (['辰', '巳'].includes(timeZhi)) { addShenSha(3, '童子煞'); }
++            }
++          }
++
++          // 去重，确保每个柱的神煞不重复
 +          Object.keys(shens).forEach(function (key) {
 +            shens[key] = shens[key].filter(function (value, index, self) { return self.indexOf(value) === index; });
 +          });
 +
++          // 缓存结果
 +          this._p.shenShaCache = shens;
 +          return shens;
 +        },
@@ -5565,7 +5585,7 @@ index d4e7f04..0741c9c 100644
            var monthZhiIndex = LunarUtil.index(this.getMonthZhi(), LunarUtil.MONTH_ZHI, 0);
            var timeZhiIndex = LunarUtil.index(this.getTimeZhi(), LunarUtil.MONTH_ZHI, 0);
            var offset = monthZhiIndex + timeZhiIndex;
-@@ -5723,8 +6095,8 @@
+@@ -5723,8 +6115,8 @@
            }
            return LunarUtil.GAN[ganIndex] + LunarUtil.MONTH_ZHI[offset];
          },
@@ -5576,7 +5596,7 @@ index d4e7f04..0741c9c 100644
            var monthZhiIndex = LunarUtil.index(this.getMonthZhi(), LunarUtil.MONTH_ZHI, 0);
            var timeZhiIndex = LunarUtil.index(this.getTimeZhi(), LunarUtil.ZHI, 0);
            var offset = monthZhiIndex + timeZhiIndex;
-@@ -5737,16 +6109,16 @@
+@@ -5737,16 +6129,16 @@
            }
            return LunarUtil.GAN[ganIndex] + LunarUtil.MONTH_ZHI[offset];
          },
@@ -5597,7 +5617,7 @@ index d4e7f04..0741c9c 100644
              var prev = lunar.getPrevJie();
              var next = lunar.getNextJie();
              var current = lunar.getSolar();
-@@ -5792,26 +6164,26 @@
+@@ -5792,26 +6184,26 @@
                hour: hour
              };
            })();
@@ -5631,7 +5651,7 @@ index d4e7f04..0741c9c 100644
              return {
                _p: {
                  year: daYun.getStartYear() + index,
-@@ -5820,11 +6192,11 @@
+@@ -5820,11 +6212,11 @@
                  daYun: daYun,
                  lunar: daYun.getLunar()
                },
@@ -5648,7 +5668,7 @@ index d4e7f04..0741c9c 100644
                  var offset = LunarUtil.getJiaZiIndex(this._p.lunar.getJieQiTable()[I18n.getMessage('jq.liChun')].getLunar().getYearInGanZhiExact()) + this._p.index;
                  if (this._p.daYun.getIndex() > 0) {
                    offset += this._p.daYun.getStartAge() - 1;
-@@ -5832,18 +6204,18 @@
+@@ -5832,18 +6224,18 @@
                  offset %= LunarUtil.JIA_ZI.length;
                  return LunarUtil.JIA_ZI[offset];
                },
@@ -5672,7 +5692,7 @@ index d4e7f04..0741c9c 100644
              return {
                _p: {
                  year: daYun.getStartYear() + index,
-@@ -5853,10 +6225,10 @@
+@@ -5853,10 +6245,10 @@
                  forward: forward,
                  lunar: daYun.getLunar()
                },
@@ -5687,7 +5707,7 @@ index d4e7f04..0741c9c 100644
                  var offset = LunarUtil.getJiaZiIndex(this._p.lunar.getTimeInGanZhi());
                  var add = this._p.index + 1;
                  if (this._p.daYun.getIndex() > 0) {
-@@ -5870,11 +6242,11 @@
+@@ -5870,11 +6262,11 @@
                  offset %= size;
                  return LunarUtil.JIA_ZI[offset];
                },
@@ -5702,7 +5722,7 @@ index d4e7f04..0741c9c 100644
              var birthYear = yun.getLunar().getSolar().getYear();
              var year = yun.getStartSolar().getYear();
              var startYear;
-@@ -5903,13 +6275,25 @@
+@@ -5903,13 +6295,25 @@
                  yun: yun,
                  lunar: yun.getLunar()
                },
@@ -5735,7 +5755,7 @@ index d4e7f04..0741c9c 100644
                  if (this._p.index < 1) {
                    return '';
                  }
-@@ -5924,31 +6308,31 @@
+@@ -5924,31 +6328,31 @@
                  }
                  return LunarUtil.JIA_ZI[offset];
                },
@@ -5775,7 +5795,7 @@ index d4e7f04..0741c9c 100644
                  }
                  return l;
                }
-@@ -5964,93 +6348,93 @@
+@@ -5964,93 +6368,98 @@
                forward: forward,
                lunar: lunar
              },
@@ -5821,7 +5841,12 @@ index d4e7f04..0741c9c 100644
      };
      return {
 -      fromLunar:function(lunar){return _fromLunar(lunar);}
-+      fromLunar: function (lunar, gender) { return _fromLunar(lunar, gender); }
++      fromLunar: function (lunar, gender) {
++        var instance = _fromLunar(lunar, gender);
++        var boundCalculateShenSha = instance._calculateShenSha.bind(instance);
++        instance._calculateShenSha = boundCalculateShenSha;
++        return instance;
++      }
      };
    })();
 -  var LunarTime = (function(){
@@ -5921,7 +5946,7 @@ index d4e7f04..0741c9c 100644
              asc = true;
            }
            var offset = asc ? [0, 3, 6] : [8, 5, 2];
-@@ -6058,87 +6442,87 @@
+@@ -6058,87 +6467,87 @@
            var index = asc ? (start + this._p.zhiIndex) : (start + 9 - this._p.zhiIndex);
            return NineStar.fromIndex(index % 9);
          },
@@ -6059,7 +6084,7 @@ index d4e7f04..0741c9c 100644
          '{xx.jiao}',
          '{xx.kang}',
          '{xx.di}',
-@@ -6167,8 +6551,8 @@
+@@ -6167,8 +6576,8 @@
          '{xx.yi}',
          '{xx.zhen}'
        ],
@@ -6070,7 +6095,7 @@ index d4e7f04..0741c9c 100644
          '1-1': [_f('天腊，玉帝校世人神气禄命', xl), _s],
          '1-3': [_f('万神都会', dj), _d],
          '1-5': [_f('五虚忌')],
-@@ -6229,7 +6613,7 @@
+@@ -6229,7 +6638,7 @@
          '4-7': [_f('南斗、北斗、西斗同降', js), _y],
          '4-8': [_f('释迦牟尼佛诞', dj), _f('万神善会', '犯者失瘼夭胎'), _f('善恶童子降', '犯者血死'), _f('九殿平等王诞'), _t],
          '4-14': [_f('纯阳祖师诞', js), _t],
@@ -6079,7 +6104,7 @@ index d4e7f04..0741c9c 100644
          '4-16': [_f('天地仓开日', ss)],
          '4-17': [_f('十殿转轮王诞', dj)],
          '4-18': [_f('天地仓开日', ss), _f('紫徽大帝诞', ss)],
-@@ -6246,7 +6630,7 @@
+@@ -6246,7 +6655,7 @@
          '5-6': [_j, _l],
          '5-7': [_j],
          '5-8': [_f('南方五道诞'), _t],
@@ -6088,7 +6113,7 @@ index d4e7f04..0741c9c 100644
          '5-12': [_f('炳灵公诞')],
          '5-13': [_f('关圣降', xl)],
          '5-14': [_f('夜子时为天地交泰', jw), _t],
-@@ -6288,7 +6672,7 @@
+@@ -6288,7 +6697,7 @@
          '7-12': [_f('长真谭真人诞')],
          '7-13': [_f('大势至菩萨诞', js)],
          '7-14': [_f('三元降', js), _t],
@@ -6097,7 +6122,7 @@ index d4e7f04..0741c9c 100644
          '7-16': [_f('三元降', js)],
          '7-18': [_f('西王母诞', dj)],
          '7-19': [_f('太岁诞', dj)],
-@@ -6389,7 +6773,7 @@
+@@ -6389,7 +6798,7 @@
          '12-29': [_f('华严菩萨诞'), _t],
          '12-30': [_f('诸神下降，察访善恶', '犯者男女俱亡')]
        },
@@ -6106,7 +6131,7 @@ index d4e7f04..0741c9c 100644
          '1-1': ['弥勒菩萨圣诞'],
          '1-6': ['定光佛圣诞'],
          '2-8': ['释迦牟尼佛出家'],
-@@ -6421,184 +6805,184 @@
+@@ -6421,184 +6830,184 @@
          '12-23': ['监斋菩萨圣诞'],
          '12-29': ['华严菩萨圣诞']
        },
@@ -6385,7 +6410,7 @@ index d4e7f04..0741c9c 100644
        },
        FESTIVAL: {
          '1-1': [_f('天腊之辰', '天腊，此日五帝会于东方九炁青天')],
-@@ -6700,9 +7084,9 @@
+@@ -6700,9 +7109,9 @@
        }
      }
    })();
@@ -6397,7 +6422,7 @@ index d4e7f04..0741c9c 100644
          '{n.one}',
          '{n.two}',
          '{n.three}',
-@@ -6713,7 +7097,7 @@
+@@ -6713,7 +7122,7 @@
          '{n.eight}',
          '{n.nine}'
        ],
@@ -6406,7 +6431,7 @@ index d4e7f04..0741c9c 100644
          '{wx.shui}',
          '{wx.tu}',
          '{wx.mu}',
-@@ -6724,7 +7108,7 @@
+@@ -6724,7 +7133,7 @@
          '{wx.tu}',
          '{wx.huo}'
        ],
@@ -6415,7 +6440,7 @@ index d4e7f04..0741c9c 100644
          '{bg.kan}',
          '{bg.kun}',
          '{bg.zhen}',
-@@ -6735,7 +7119,7 @@
+@@ -6735,7 +7144,7 @@
          '{bg.gen}',
          '{bg.li}'
        ],
@@ -6424,7 +6449,7 @@ index d4e7f04..0741c9c 100644
          '{s.goodLuck}',
          '{s.badLuck}',
          '{s.badLuck}',
-@@ -6746,7 +7130,7 @@
+@@ -6746,7 +7155,7 @@
          '{s.goodLuck}',
          '{s.goodLuck}'
        ],
@@ -6433,7 +6458,7 @@ index d4e7f04..0741c9c 100644
          '{s.yang}',
          '{s.yin}',
          '{s.yang}',
-@@ -6757,7 +7141,7 @@
+@@ -6757,7 +7166,7 @@
          '{s.yang}',
          '{s.yin}'
        ],
@@ -6442,7 +6467,7 @@ index d4e7f04..0741c9c 100644
          '{s.white}',
          '{s.black}',
          '{s.blue}',
-@@ -6770,72 +7154,72 @@
+@@ -6770,72 +7179,72 @@
        ]
      }
    })();
@@ -6551,7 +6576,7 @@ index d4e7f04..0741c9c 100644
            var ret = false;
            var mz = this._p.lunar.getMonthZhi();
            var dgz = this._p.lunar.getDayInGanZhi();
-@@ -6858,22 +7242,22 @@
+@@ -6858,22 +7267,22 @@
            }
            return ret;
          },
@@ -6583,7 +6608,7 @@ index d4e7f04..0741c9c 100644
      var _defaultLang = 'chs';
      var _lang = _defaultLang;
      var _inited = false;
-@@ -8292,42 +8676,42 @@
+@@ -8292,42 +8701,42 @@
        }
      };
  
@@ -6635,7 +6660,7 @@ index d4e7f04..0741c9c 100644
              return _getMessage($1);
            });
            o[k][i] = dict[key];
-@@ -8335,18 +8719,18 @@
+@@ -8335,18 +8744,18 @@
        }
      };
  
@@ -6658,7 +6683,7 @@ index d4e7f04..0741c9c 100644
                return _getMessage($1);
              });
            }
-@@ -8355,7 +8739,7 @@
+@@ -8355,7 +8764,7 @@
        }
      };
  
@@ -6667,7 +6692,7 @@ index d4e7f04..0741c9c 100644
        var c;
        for (c in _arrays) {
          _updateArray(c);
-@@ -8371,18 +8755,18 @@
+@@ -8371,18 +8780,18 @@
        }
      };
  
@@ -6689,7 +6714,7 @@ index d4e7f04..0741c9c 100644
        if (!messages) {
          return;
        }
-@@ -8395,7 +8779,7 @@
+@@ -8395,7 +8804,7 @@
        _update();
      };
  
@@ -6698,7 +6723,7 @@ index d4e7f04..0741c9c 100644
        var s = _messages[_lang][key];
        if (undefined === s) {
          s = _messages[_defaultLang][key];
-@@ -8406,7 +8790,7 @@
+@@ -8406,7 +8815,7 @@
        return s;
      };
  
@@ -6707,7 +6732,7 @@ index d4e7f04..0741c9c 100644
        var v = _arrays[c];
        var o = _objs[c];
        for (var k in v) {
-@@ -8418,9 +8802,9 @@
+@@ -8418,9 +8827,9 @@
        }
      };
  
@@ -6719,7 +6744,7 @@ index d4e7f04..0741c9c 100644
          case 'string':
            v = _dictString[c];
            break;
-@@ -8441,7 +8825,7 @@
+@@ -8441,7 +8850,7 @@
        }
      };
  
@@ -6728,7 +6753,7 @@ index d4e7f04..0741c9c 100644
        if (_inited) {
          return;
        }
-@@ -8463,34 +8847,34 @@
+@@ -8463,34 +8872,34 @@
      };
      _init();
      return {

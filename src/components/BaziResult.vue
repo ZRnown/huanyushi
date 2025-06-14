@@ -101,10 +101,9 @@
   // 根据 baziStore 中的数据计算 baziData
   const baziData = computed(() => {
     const input = baziStore.getBaziInputData;
-  
     let solarDisplay = '';
     let lunarDisplay = '';
-    let lunarInfo,eightChar;
+    let lunarInfo,eightChar,yun;
     const genderText = input.gender === '男' ? '乾造 (男)' : '坤造 (女)';
     const genderClass = input.gender === '男' ? 'male' : 'female';
     if (input.inputType === 'solar' && input.solarDate.year !== null) {
@@ -121,6 +120,7 @@
       solarDisplay = solar.toYmdHms();
       lunarDisplay = lunarInfo.toString() + " " + lunarInfo.getTimeZhi() + "时";
       eightChar = EightChar.fromLunar(lunarInfo, input.gender === '男' ? 1 : 0);
+      yun = eightChar.getYun(input.gender === '男' ? 1 : 0);
     } else if (input.inputType === 'lunar' && input.lunarDate.year !== null) {
       // 从农历日期创建 Lunar 对象
       let lunarInfo = Lunar.fromYmd(
@@ -145,6 +145,7 @@
       solarDisplay = tempSolar.toYmdHms();
       lunarDisplay = lunarInfo.toString() + " " + lunarInfo.getTimeZhi() + "时";
       eightChar = EightChar.fromLunar(lunarInfo, input.gender === '男' ? 1 : 0);
+      yun = eightChar.getYun(input.gender === '男' ? 1 : 0);
     } else if (input.inputType === 'bazi') {
       const { yearGanZhi, monthGanZhi, dayGanZhi, hourGanZhi } = input.baziData;
       solarDisplay = `四柱八字: ${yearGanZhi} ${monthGanZhi} ${dayGanZhi} ${hourGanZhi}`;
@@ -269,8 +270,8 @@
         traits: []
       },
       geju: { name: '', quality: '', description: '' },
-      dayun: [],
-      liunian: [],
+      qiyun:'出生' + yun.getStartYear() + '年' + yun.getStartMonth() + '个月' + yun.getStartDay() + '天后起运',
+      dayun: yun.getDaYun(),
       deepAnalysis: { career: '', wealth: '', marriage: '', health: '', education: '', relationships: '' }
     };
   });

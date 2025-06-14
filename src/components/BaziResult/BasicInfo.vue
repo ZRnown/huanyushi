@@ -145,56 +145,74 @@
       <div class="fortune-info">
         <div class="fortune-info-item">
           <span class="info-icon">起</span>
-          <span>出生后{{ dayunInfo.startYear }}年{{ dayunInfo.startMonth }}月{{ dayunInfo.startDay }}天{{ dayunInfo.startHour || '' }}时起运</span>
+          <span>{{ baziData.qiyun }}</span>
         </div>
         <div class="fortune-info-item">
           <span class="info-icon">交</span>
-          <span>{{ dayunInfo.jiaoyun }}</span>
+          <span>逢癸、戊年 小寒后5天 交大运</span>
         </div>
         <div class="fortune-info-item">
           <span class="info-icon">空</span>
-          <span>{{ dayunInfo.kongwang }}</span>
+          <span>{{ baziData.pillars[2].kongwang }}空亡（日）</span>
         </div>
         <div class="fortune-info-item">
           <span class="info-icon">岁</span>
-          <span>{{ liunianList[selectedLiunianIndex] && liunianList[selectedLiunianIndex].age ? liunianList[selectedLiunianIndex].age : 1 }}岁</span>
+          <span>{{ baziData.dayun[selectedDayunIndex]?.getLiuNian?.()[selectedLiunianIndex]?.getAge?.() || 1 }}岁</span>
         </div>
         <div class="fortune-info-item">
           <span class="info-icon">令</span>
-          <span>司令:{{ dayunInfo.siling }}</span>
+          <span>司令:丙</span>
         </div>
       </div>
       
       <!-- 大运 -->
       <div class="fortune-scroll-container">
-        <div class="fortune-scroll-label">大运</div>
+        <div class="fortune-scroll-label dayun-label">
+          <div class="label-text">大运</div>
+          <div class="label-ornament"></div>
+        </div>
         <div class="fortune-scroll">
           <div
-            v-for="(yun, idx) in dayunList"
-            :key="yun.startYear"
+            v-for="(daYun, idx) in baziData.dayun"
+            :key="daYun.getStartYear()"
             class="fortune-item dayun-item"
             :class="{ 'fortune-item-selected': idx === selectedDayunIndex }"
             @click="selectDayun(idx)"
           >
-            <div class="fortune-item-main">{{ yun.gan }}{{ yun.zhi }}</div>
-            <div class="fortune-item-sub">{{ yun.startYear }}年/{{ yun.startAge }}岁</div>
+            <div class="fortune-item-main">
+              <template v-if="daYun.getGanZhi()">
+                <span :class="getGanClass(daYun.getGanZhi()[0])">{{ daYun.getGanZhi()[0] }}</span>
+                <span :class="getZhiClass(daYun.getGanZhi()[1])">{{ daYun.getGanZhi()[1] }}</span>
+              </template>
+              <template v-else>
+                <span style="font-size:1.1em;color:#b26259;">小运</span>
+              </template>
+            </div>
+            <div class="fortune-item-sub">{{ daYun.getStartYear() }}</div>
+            <div class="fortune-item-sub">{{ daYun.getStartAge() }}岁</div>
           </div>
         </div>
       </div>
       
       <!-- 流年 -->
       <div class="fortune-scroll-container">
-        <div class="fortune-scroll-label">流年</div>
+        <div class="fortune-scroll-label liunian-label">
+          <div class="label-text">流年</div>
+          <div class="label-ornament"></div>
+        </div>
         <div class="fortune-scroll">
           <div
-            v-for="(nian, idx) in liunianList"
-            :key="nian.year"
+            v-for="(liuNian, idx) in baziData.dayun[selectedDayunIndex].getLiuNian()"
+            :key="liuNian.getYear()"
             class="fortune-item liunian-item"
             :class="{ 'fortune-item-selected': idx === selectedLiunianIndex }"
             @click="selectLiunian(idx)"
           >
-            <div class="fortune-item-main">{{ nian.gan }}{{ nian.zhi }}</div>
-            <div class="fortune-item-sub">{{ nian.year }}</div>
+            <div class="fortune-item-main">
+              <span :class="getGanClass(liuNian.getGanZhi()[0])">{{ liuNian.getGanZhi()[0] }}</span>
+              <span :class="getZhiClass(liuNian.getGanZhi()[1])">{{ liuNian.getGanZhi()[1] }}</span>
+            </div>
+            <div class="fortune-item-sub">{{ liuNian.getYear() }}</div>
           </div>
         </div>
       </div>
@@ -204,92 +222,36 @@
 
 <script setup>
 import { defineProps } from 'vue'
-import { ref, computed } from 'vue'
-import { Lunar, EightChar } from 'lunar-javascript'
+import { ref } from 'vue'
 
 const props = defineProps({ baziData: Object })
-console.log(props);
-
-// 大运流年相关
-const dayunInfo = ref({
-  startYear: 0,
-  startMonth: 0,
-  startDay: 0,
-  jiaoyun: '逢丁、壬年 寒露后23天 交大运', // 示例
-  kongwang: '寅卯空亡（日）', // 示例
-  firstAge: 1,
-  siling: '丙'
-})
-const dayunList = ref([])
-const liunianList = ref([])
+// 只保留选中索引和切换逻辑
 const selectedDayunIndex = ref(1)
 const selectedLiunianIndex = ref(0)
 
-function calcDayun() {
-  // 用props.baziData生成八字对象
-  let d
-  if (props.baziData && props.baziData.pillars && props.baziData.pillars.length === 4) {
-    // 尝试用四柱八字生成
-    try {
-      d = EightChar.fromGanZhi(
-        props.baziData.pillars[0].tiangan.char + props.baziData.pillars[0].dizhi.char,
-        props.baziData.pillars[1].tiangan.char + props.baziData.pillars[1].dizhi.char,
-        props.baziData.pillars[2].tiangan.char + props.baziData.pillars[2].dizhi.char,
-        props.baziData.pillars[3].tiangan.char + props.baziData.pillars[3].dizhi.char
-      )
-    } catch (e) {
-      d = Lunar.fromDate(new Date()).getEightChar()
-    }
-  } else {
-    d = Lunar.fromDate(new Date()).getEightChar()
-  }
-  const gender = props.baziData.gender && props.baziData.gender.includes('男') ? 1 : 0
-  const yun = d.getYun(gender)
-  dayunInfo.value.startYear = yun.getStartYear()
-  dayunInfo.value.startMonth = yun.getStartMonth()
-  dayunInfo.value.startDay = yun.getStartDay()
-  dayunInfo.value.firstAge = yun.getDaYun()[0].getStartAge()
-  // dayunInfo.value.siling = ... // 可补充司令等
+// 五行映射表
+const tianElementMap = {
+  '甲':'wood','乙':'wood','丙':'fire','丁':'fire','戊':'earth','己':'earth','庚':'metal','辛':'metal','壬':'water','癸':'water'
+}
+const diElementMap = {
+  '子':'water','丑':'earth','寅':'wood','卯':'wood','辰':'earth','巳':'fire','午':'fire','未':'earth','申':'metal','酉':'metal','戌':'earth','亥':'water'
+}
 
-  // 大运
-  dayunList.value = yun.getDaYun().map(daYun => {
-    const ganZhi = daYun.getGanZhi()
-    return {
-      startYear: daYun.getStartYear(),
-      startAge: daYun.getStartAge(),
-      gan: ganZhi.substr(0, 1),
-      zhi: ganZhi.substr(1, 1),
-      ganShiShen: '', // 可用d.getDayGan()等推算
-      zhiShiShen: ''
-    }
-  })
-
-  // 流年（以当前选中大运为例）
-  const liuNianArr = yun.getDaYun()[selectedDayunIndex.value]?.getLiuNian() || []
-  liunianList.value = liuNianArr.map(liuNian => {
-    const ganZhi = liuNian.getGanZhi()
-    return {
-      year: liuNian.getYear(),
-      ganzhi: ganZhi,
-      gan: ganZhi.substr(0, 1),
-      zhi: ganZhi.substr(1, 1),
-      ganShiShen: '',
-      zhiShiShen: '',
-      age: liuNian.getAge()
-    }
-  })
+function getGanClass(gan) {
+  return tianElementMap[gan] || ''
+}
+function getZhiClass(zhi) {
+  return diElementMap[zhi] || ''
 }
 
 function selectDayun(idx) {
   selectedDayunIndex.value = idx
-  calcDayun()
+  selectedLiunianIndex.value = 0 // 切换大运时重置流年选中
 }
 
 function selectLiunian(idx) {
   selectedLiunianIndex.value = idx
 }
-
-calcDayun()
 </script>
 
 <style>
@@ -472,7 +434,7 @@ calcDayun()
 }
 
 /* 五行颜色 */
-.wood { color: #08e92f; }
+.wood { color: #0fca2e; }
 .fire { color: #d30505; }
 .earth { color: #8b6d03; }
 .metal { color: #ef9106; }
@@ -591,31 +553,62 @@ calcDayun()
   font-size: 0.9rem;
 }
 
-/* 大运流年滚动区域 */
+/* 大运流年滚动区域 - 美化版 */
 .fortune-scroll-container {
   margin-bottom: 1.5rem;
   position: relative;
+  border: 1px solid #d9c7b3;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .fortune-scroll-container:last-child {
   margin-bottom: 0;
 }
 
+/* 美化的标签样式 */
 .fortune-scroll-label {
   position: absolute;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #8b6543;
+  top: 0;
+  bottom: 0;
+  width: 3rem;
+  background: linear-gradient(to right, #8b6543, #a17d5d);
   color: #fff;
-  padding: 0.5rem;
-  border-radius: 4px 0 0 4px;
-  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
-  width: 2rem;
-  text-align: center;
+  box-shadow: 2px 0 8px rgba(139, 101, 67, 0.2);
+}
+
+.label-text {
   writing-mode: vertical-lr;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.2em;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  margin-bottom: 0.5rem;
+}
+
+.label-ornament {
+  width: 1.5rem;
+  height: 1.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2 L14 6 L18 7 L15 10 L16 14 L12 12 L8 14 L9 10 L6 7 L10 6 Z' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.8;
+}
+
+/* 大运标签特殊样式 */
+.dayun-label {
+  background: linear-gradient(to right, #8b6543, #a17d5d);
+}
+
+/* 流年标签特殊样式 */
+.liunian-label {
+  background: linear-gradient(to right, #a15c41, #b87a5f);
 }
 
 .fortune-scroll {
@@ -623,12 +616,13 @@ calcDayun()
   grid-template-columns: repeat(10, 1fr);
   width: 100%;
   padding-left: 3rem;
+  background: #fff;
 }
 
 .fortune-item {
   background: #fff;
   border: 1px solid #d9c7b3;
-  padding: 0.5rem;
+  padding: 0.8rem 0.5rem;
   text-align: center;
   cursor: pointer;
   display: flex;
@@ -637,29 +631,58 @@ calcDayun()
   border-radius: 0;
   margin: 0;
   border-right: none;
+  border-top: none;
+  border-bottom: none;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 .fortune-item:last-child {
-  border-right: 1px solid #d9c7b3;
+  border-right: none;
+}
+
+.fortune-item:hover {
+  background: #f9f5ef;
 }
 
 .fortune-item-selected {
   background: #f0e6d6;
 }
 
+.fortune-item-selected::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  width: 80%;
+  height: 3px;
+  background: #8b6543;
+  border-radius: 1.5px;
+}
+
 .fortune-item-main {
-  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  writing-mode: initial;
+  text-orientation: initial;
+  letter-spacing: 0.1em;
+  font-size: 1.2rem;
   color: #3a2921;
   font-weight: bold;
+  line-height: 1.2;
+  min-height: 2.5em;
 }
 
 .fortune-item-sub {
   font-size: 0.9rem;
   color: #8b6543;
+  margin-top: 0.3rem;
 }
 
 .liunian-item {
-  padding: 0.4rem;
+  padding: 0.6rem 0.4rem;
 }
 
 /* 响应式调整 */
@@ -688,6 +711,22 @@ calcDayun()
     padding: 0.8rem;
     gap: 0.8rem 1.5rem;
   }
+  
+  .fortune-scroll-label {
+    width: 2.5rem;
+  }
+  
+  .label-text {
+    font-size: 1rem;
+  }
+  
+  .fortune-scroll {
+    padding-left: 2.5rem;
+  }
+  
+  .fortune-item-main {
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -706,12 +745,30 @@ calcDayun()
   }
   
   .fortune-scroll-label {
-    width: 1.5rem;
+    width: 2rem;
+  }
+  
+  .label-text {
     font-size: 0.9rem;
+    letter-spacing: 0.1em;
+  }
+  
+  .label-ornament {
+    width: 1.2rem;
+    height: 1.2rem;
   }
   
   .fortune-scroll {
-    padding-left: 2.5rem;
+    padding-left: 2rem;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  .fortune-item-main {
+    font-size: 1rem;
+  }
+  
+  .fortune-item-sub {
+    font-size: 0.8rem;
   }
 }
 </style>
