@@ -14,6 +14,7 @@
       @touchstart="startDragTouch"
       @touchmove="handleDragTouch"
       @touchend="endDrag"
+      :style="{ height: (itemHeight * 5) + 'px' }"
     >
       <div class="picker-decoration top-decoration"></div>
       <div
@@ -34,7 +35,10 @@
           <span class="item-unit">{{ unit }}</span>
         </div>
       </div>
-      <div class="gufeng-picker-highlight">
+      <div 
+        class="gufeng-picker-highlight"
+        :style="{ height: itemHeight + 'px', top: (itemHeight * 2) + 'px' }"
+      >
         <div class="highlight-border top-border"></div>
         <div class="highlight-border bottom-border"></div>
         <div class="highlight-background"></div>
@@ -84,7 +88,7 @@ const selectItem = (index) => {
   selectedIndex.value = index
   emits('update:modelValue', props.items[index])
   emits('selected-change', props.items[index])
-  const centerOffset = (containerHeight.value - itemHeight.value) / 2
+  const centerOffset = itemHeight.value * 2
   translateY.value = centerOffset - index * itemHeight.value
   console.log('GufengWheelPicker: selectedItem', props.items[index], 'at index', index, 'translateY', translateY.value);
 }
@@ -208,7 +212,6 @@ onMounted(() => {
 }
 
 .gufeng-picker-container {
-  height: 240px;
   width: 100%;
   overflow: hidden;
   position: relative;
@@ -250,7 +253,6 @@ onMounted(() => {
 
 .gufeng-picker-list {
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  padding: 20px 0;
 }
 
 .gufeng-picker-item {
@@ -301,12 +303,10 @@ onMounted(() => {
   position: absolute;
   left: 8px;
   right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 40px;
   pointer-events: none;
   z-index: 2;
-  border-radius: 6px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px #c9a77c, 0 2px 8px rgba(139,101,67,0.08);
 }
 
 .highlight-background {
@@ -316,23 +316,24 @@ onMounted(() => {
   right: 0;
   bottom: 0;
   background: linear-gradient(135deg, 
-    rgba(201, 167, 124, 0.08) 0%, 
-    rgba(139, 101, 67, 0.05) 50%, 
-    rgba(201, 167, 124, 0.08) 100%);
-  border-radius: 6px;
+    rgba(201, 167, 124, 0.12) 0%, 
+    rgba(139, 101, 67, 0.08) 50%, 
+    rgba(201, 167, 124, 0.12) 100%);
+  border-radius: 8px;
 }
 
 .highlight-border {
   position: absolute;
   left: 0;
   right: 0;
-  height: 1px;
+  height: 2px;
   background: linear-gradient(90deg, 
     transparent 0%, 
-    rgba(201, 167, 124, 0.6) 20%, 
-    rgba(139, 101, 67, 0.8) 50%, 
-    rgba(201, 167, 124, 0.6) 80%, 
+    #c9a77c 20%, 
+    #8b6543 50%, 
+    #c9a77c 80%, 
     transparent 100%);
+  border-radius: 2px;
 }
 
 .top-border {
@@ -366,6 +367,13 @@ onMounted(() => {
     height: 32px;
     font-size: 0.9rem;
   }
+  .gufeng-picker-highlight {
+    border-radius: 6px;
+    box-shadow: 0 0 0 1.5px #c9a77c, 0 2px 6px rgba(139,101,67,0.08);
+  }
+  .highlight-background {
+    border-radius: 6px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -394,6 +402,13 @@ onMounted(() => {
   
   .highlight-border {
     height: 0.5px;
+  }
+  .gufeng-picker-highlight {
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px #c9a77c, 0 1px 4px rgba(139,101,67,0.08);
+  }
+  .highlight-background {
+    border-radius: 4px;
   }
 }
 </style>
